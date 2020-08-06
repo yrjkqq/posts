@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>My New Hugo Site</title>
+    <title>That&#39;s the Way It Is</title>
     <link>https://yrjkqq.github.io/posts/</link>
-    <description>Recent content on My New Hugo Site</description>
+    <description>Recent content on That&#39;s the Way It Is</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Thu, 06 Aug 2020 16:41:00 +0800</lastBuildDate>
@@ -17,7 +17,7 @@
       <pubDate>Thu, 06 Aug 2020 16:41:00 +0800</pubDate>
       
       <guid>https://yrjkqq.github.io/posts/posts/my-first-post/</guid>
-      <description></description>
+      <description>Use hugo generate static site is so much fun!</description>
     </item>
     
   </channel>

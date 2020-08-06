@@ -1,5 +1,5 @@
 baseURL = "https://yrjkqq.github.io/posts/"
 languageCode = "en-us"
-title = "My New Hugo Site"
+title = "That's the Way It Is"
 theme = "ananke"
 publishDir = "docs"
