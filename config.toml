@@ -3,3 +3,7 @@ languageCode = "en-us"
 title = "That's the Way It Is"
 theme = "ananke"
 publishDir = "docs"
+
+[params]
+  favicon = "img/favicon.ico"
+  site_logo = "img/favicon.ico"
