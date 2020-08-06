@@ -6,4 +6,4 @@ publishDir = "docs"
 
 [params]
   favicon = "img/favicon.ico"
-  site_logo = "img/favicon.ico"
+  site_logo = "/posts/img/favicon.ico"
