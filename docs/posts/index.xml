@@ -17,7 +17,8 @@
       <pubDate>Thu, 06 Aug 2020 16:41:00 +0800</pubDate>
       
       <guid>https://yrjkqq.github.io/posts/posts/my-first-post/</guid>
-      <description>Use hugo generate static site is so much fun!</description>
+      <description>Use hugo generate static site is so much fun!
+console.log(&amp;#34;Hello, World!&amp;#34;) </description>
     </item>
     
   </channel>
