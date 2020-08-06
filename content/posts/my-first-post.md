@@ -5,3 +5,7 @@ draft: false
 ---
 
 Use hugo generate static site is so much fun!
+
+```js
+console.log("Hello, World!")
+```
