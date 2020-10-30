@@ -12,7 +12,8 @@ pygmentscodefencesguesssyntax = true
 
 [params]
   mode = "auto"
-  favicon = "img/favicon.ico"
+  useCDN=false # don't use CDNs for fonts and icons, instead serve them locally.
+  favicon = "/posts/img/favicon.ico"
   site_logo = "/posts/img/favicon.ico"
 
 # Main menu Items
