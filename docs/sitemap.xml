@@ -3,7 +3,7 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
-    <loc>https://yrjkqq.github.io/posts/posts/my-first-post/</loc>
+    <loc>https://yrjkqq.github.io/posts/posts/01.geekbang-algs-beauty/</loc>
     <lastmod>2020-08-06T16:41:00+08:00</lastmod>
   </url>
   
@@ -15,6 +15,11 @@
   <url>
     <loc>https://yrjkqq.github.io/posts/</loc>
     <lastmod>2020-08-06T16:41:00+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://yrjkqq.github.io/posts/posts/00.understanding-nodejs-deeply/</loc>
+    <lastmod>2019-01-02T16:41:00+08:00</lastmod>
   </url>
   
   <url>

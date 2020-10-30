@@ -9,12 +9,30 @@
     <lastBuildDate>Thu, 06 Aug 2020 16:41:00 +0800</lastBuildDate><atom:link href="https://yrjkqq.github.io/posts/posts/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>My First Post</title>
-      <link>https://yrjkqq.github.io/posts/posts/my-first-post/</link>
+      <link>https://yrjkqq.github.io/posts/posts/01.geekbang-algs-beauty/</link>
       <pubDate>Thu, 06 Aug 2020 16:41:00 +0800</pubDate>
       
-      <guid>https://yrjkqq.github.io/posts/posts/my-first-post/</guid>
+      <guid>https://yrjkqq.github.io/posts/posts/01.geekbang-algs-beauty/</guid>
       <description>Use hugo generate static site is so much fun!
 console.log(&amp;#34;Hello, World!&amp;#34;) </description>
+    </item>
+    
+    <item>
+      <title>《深入浅出 Node.js》</title>
+      <link>https://yrjkqq.github.io/posts/posts/00.understanding-nodejs-deeply/</link>
+      <pubDate>Wed, 02 Jan 2019 16:41:00 +0800</pubDate>
+      
+      <guid>https://yrjkqq.github.io/posts/posts/00.understanding-nodejs-deeply/</guid>
+      <description>记录看 《深入浅出 Node.js》一书过程中遇到的知识点和问题，方便日后回顾。
+第 3 章 异步 I/O 异步 I/O 主要关注点在用户体验和资源分配。
+用户体验方面，异步方式在响应请求方面显著降低了同步请求的等待时间，由 M+N 降低为 max(M+N)。
+Node 利用单线程，解决了多线程编程模型中死锁、状态同步等问题，结合异步 I/O 解决了单线程串行依次执行编程模型因阻塞 I/O 导致资源得不到更优应用的问题。
+操作系统对异步 I/O 的支持 非阻塞 I/O 在调用后会立即返回，但是由于完整的 I/O 并没有完成，立即返回的并不是业务层期望的数据，而仅仅时调用状态。为了获取完整的数据，应用程序需要重复调用 I/O 操作即轮询来确认是否完成。
+现有的轮询技术主要有：read select poll epoll kqueue
+单线程中实现异步 I/O 总会有各种缺陷，但是利用多线程，通过让部分线程进行阻塞 I/O 或者非阻塞 I/O 加轮询技术来完成数据获取，让一个线程进行计算处理，通过线程之间的通信将 I/O 得到的数据进行传递，即可模拟出异步 I/O.
+Node 在 linux 下通过自行实现线程池，在 windows 下使用 IOCP(内核管理的线程池)，并且提供 libuv 对平台差异性进行抽象封装，来实现异步 I/O.
+Node 如何实现异步 I/O 完成整个异步 I/O 环节的有事件循环、观察者模式和请求对象等。
+在 Node 中，js 是在单线程执行，而 Node 自身是多线程运行的。</description>
     </item>
     
   </channel>
