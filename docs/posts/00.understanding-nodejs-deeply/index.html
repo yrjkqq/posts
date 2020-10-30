@@ -180,7 +180,7 @@ Node 如何实现异步 I/O 完成整个异步 I/O 环节的有事件循环、�
 <p>Node 在 linux 下通过自行实现线程池，在 windows 下使用 IOCP(内核管理的线程池)，并且提供 libuv 对平台差异性进行抽象封装，来实现异步 I/O.</p>
 <h3 id="node-如何实现异步-io">Node 如何实现异步 I/O</h3>
 <p>完成整个异步 I/O 环节的有事件循环、观察者模式和请求对象等。</p>
-<p><img src="http://qizmdpeej.bkt.clouddn.com/Snipaste_2020-10-30_08-02-28.png" alt="整个异步 I/O 的执行流程"></p>
+<p><img src="/posts/img/Snipaste_2020-10-30_08-02-28.png" alt="整个异步 I/O 的执行流程"></p>
 <p>在 Node 中，js 是在单线程执行，而 Node 自身是多线程运行的。</p>
 <ul class="pa0">
   
