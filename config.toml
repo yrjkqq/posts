@@ -1,10 +1,23 @@
 baseURL = "https://yrjkqq.github.io/posts/"
 languageCode = "en-us"
 title = "That's the Way It Is"
-theme = "ananke"
+# theme = "ananke"
+theme = "archie"
 publishDir = "docs"
+copyright = "© yrjkqq"
+# Code Highlight
+pygmentsstyle = "monokai"
+pygmentscodefences = true
+pygmentscodefencesguesssyntax = true
 
 [params]
+  mode = "auto"
   favicon = "img/favicon.ico"
   site_logo = "/posts/img/favicon.ico"
-  post_content_classes = "sans-serif bg-near-white"
+
+# Main menu Items
+
+[[menu.main]]
+name = "Tags"
+url = "/tags"
+weight = 1

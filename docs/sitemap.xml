@@ -3,7 +3,17 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
+    <loc>https://yrjkqq.github.io/posts/tags/node/</loc>
+    <lastmod>2019-01-02T16:41:00+08:00</lastmod>
+  </url>
+  
+  <url>
     <loc>https://yrjkqq.github.io/posts/posts/</loc>
+    <lastmod>2019-01-02T16:41:00+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://yrjkqq.github.io/posts/tags/</loc>
     <lastmod>2019-01-02T16:41:00+08:00</lastmod>
   </url>
   
@@ -18,8 +28,18 @@
   </url>
   
   <url>
+    <loc>https://yrjkqq.github.io/posts/tags/algs/</loc>
+    <lastmod>2018-10-08T19:41:00+08:00</lastmod>
+  </url>
+  
+  <url>
     <loc>https://yrjkqq.github.io/posts/posts/01.geekbang-algs-beauty/</loc>
     <lastmod>2018-10-08T19:41:00+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://yrjkqq.github.io/posts/tags/math/</loc>
+    <lastmod>2017-10-08T19:41:00+08:00</lastmod>
   </url>
   
   <url>
@@ -29,10 +49,6 @@
   
   <url>
     <loc>https://yrjkqq.github.io/posts/categories/</loc>
-  </url>
-  
-  <url>
-    <loc>https://yrjkqq.github.io/posts/tags/</loc>
   </url>
   
 </urlset>

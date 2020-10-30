@@ -6,6 +6,7 @@
     <description>Recent content on That&#39;s the Way It Is</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
+    <copyright>© yrjkqq</copyright>
     <lastBuildDate>Wed, 02 Jan 2019 16:41:00 +0800</lastBuildDate><atom:link href="https://yrjkqq.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>《深入浅出 Node.js》学习笔记</title>
@@ -13,16 +14,17 @@
       <pubDate>Wed, 02 Jan 2019 16:41:00 +0800</pubDate>
       
       <guid>https://yrjkqq.github.io/posts/posts/00.understanding-nodejs-deeply/</guid>
-      <description>记录看 《深入浅出 Node.js》一书过程中遇到的知识点和问题，方便日后回顾。
-第 3 章 异步 I/O 异步 I/O 主要关注点在用户体验和资源分配。
+      <description>第 3 章 异步 I/O 异步 I/O 主要关注点在用户体验和资源分配。
 用户体验方面，异步方式在响应请求方面显著降低了同步请求的等待时间，由 M+N 降低为 max(M+N)。
 Node 利用单线程，解决了多线程编程模型中死锁、状态同步等问题，结合异步 I/O 解决了单线程串行依次执行编程模型因阻塞 I/O 导致资源得不到更优应用的问题。
 操作系统对异步 I/O 的支持 非阻塞 I/O 在调用后会立即返回，但是由于完整的 I/O 并没有完成，立即返回的并不是业务层期望的数据，而仅仅时调用状态。为了获取完整的数据，应用程序需要重复调用 I/O 操作即轮询来确认是否完成。
 现有的轮询技术主要有：read select poll epoll kqueue
 单线程中实现异步 I/O 总会有各种缺陷，但是利用多线程，通过让部分线程进行阻塞 I/O 或者非阻塞 I/O 加轮询技术来完成数据获取，让一个线程进行计算处理，通过线程之间的通信将 I/O 得到的数据进行传递，即可模拟出异步 I/O.
 Node 在 linux 下通过自行实现线程池，在 windows 下使用 IOCP(内核管理的线程池)，并且提供 libuv 对平台差异性进行抽象封装，来实现异步 I/O.
-Node 如何实现异步 I/O 完成整个异步 I/O 环节的有事件循环、观察者模式和请求对象等。
-在 Node 中，js 是在单线程执行，而 Node 自身是多线程运行的。</description>
+Node 如何实现异步 I/O 完成整个异步 I/O 环节的有事件循环、观察者模式、请求对象、I/O 线程池。
+事件循环：Node 自身的执行模型。在进程启动时，Node 便会创建一个类似于 while(true) 的循环，每执行一次循环体的过程我们成为 Tick。每个 Tick 的过程就是查看是否有事件等待处理，如果有则取出事件和对应的回调函数。如果存在关联的回调函数，就执行。然后进入下个循环，直到不再有事件处理。
+每个事件循环有一个或多个观察者，而判断是否有事件要处理的过程则是向这些观察者询问是否有要处理的事件。
+生产者/消费者模型：异步 I/O、网络请求等则是事件的生产者，为 Node 提供不同类型的事件，这些时间被传递到对应的观察者那里，事件循环则从观察者那里取出事件并处理。</description>
     </item>
     
     <item>
@@ -31,8 +33,7 @@ Node 如何实现异步 I/O 完成整个异步 I/O 环节的有事件循环、�
       <pubDate>Mon, 08 Oct 2018 19:41:00 +0800</pubDate>
       
       <guid>https://yrjkqq.github.io/posts/posts/01.geekbang-algs-beauty/</guid>
-      <description>本篇文章记录记录在学习《数据结构与算法之美》专栏文章时总结的知识点和问题，方便日后回顾。
- 为什么要学习算法？建立时空复杂度意识、写出高性能的代码，能够设计基础架构，提升编程技能，训练逻辑思维。
+      <description> 为什么要学习算法？建立时空复杂度意识、写出高性能的代码，能够设计基础架构，提升编程技能，训练逻辑思维。
  数据结构就是一组数据的存储方式，而算法则是操作数据的一组方法，比如队列、栈、堆、二分查找、动态规划等。
 算法学习重点：
  来历 自身的特点 适合解决的问题 实际的应用场景  复杂度分析 复杂度分析不依赖具体的测试数据来测试，可以粗略统计执行效率，排除测试数据规模和测试环境对结果的影响。
@@ -57,8 +58,7 @@ Node 如何实现异步 I/O 完成整个异步 I/O 环节的有事件循环、�
       <pubDate>Sun, 08 Oct 2017 19:41:00 +0800</pubDate>
       
       <guid>https://yrjkqq.github.io/posts/posts/02.basic-mathmaticth/</guid>
-      <description>复习一些基础数学知识。
-概率相关 独立事件
+      <description>概率相关 独立事件
 代数 对数中换底公式用于计算对数时间复杂度。</description>
     </item>
     

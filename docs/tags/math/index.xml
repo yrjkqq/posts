@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Math on That&#39;s the Way It Is</title>
+    <link>https://yrjkqq.github.io/posts/tags/math/</link>
+    <description>Recent content in Math on That&#39;s the Way It Is</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <copyright>© yrjkqq</copyright>
+    <lastBuildDate>Sun, 08 Oct 2017 19:41:00 +0800</lastBuildDate><atom:link href="https://yrjkqq.github.io/posts/tags/math/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>基础数学知识</title>
+      <link>https://yrjkqq.github.io/posts/posts/02.basic-mathmaticth/</link>
+      <pubDate>Sun, 08 Oct 2017 19:41:00 +0800</pubDate>
+      
+      <guid>https://yrjkqq.github.io/posts/posts/02.basic-mathmaticth/</guid>
+      <description>概率相关 独立事件
+代数 对数中换底公式用于计算对数时间复杂度。</description>
+    </item>
+    
+  </channel>
+</rss>
