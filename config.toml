@@ -7,3 +7,4 @@ publishDir = "docs"
 [params]
   favicon = "img/favicon.ico"
   site_logo = "/posts/img/favicon.ico"
+  post_content_classes = "sans-serif bg-near-white"
