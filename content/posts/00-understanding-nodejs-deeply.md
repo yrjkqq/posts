@@ -160,5 +160,36 @@ i10n.get(function (err, resources) {
 });
 ```
 
-*本章节剩余部分已经过时，移步 [了解 JavaScript Promise](http://nodejs.cn/learn/understanding-javascript-promises) 和 [《ECMAScript6 入门》Promise 对象](https://es6.ruanyifeng.com/#docs/promise) 学习基于 Promise 或 Async/Await 的异步编程解决方案*
+*本章节剩余部分已经过时，移步 [了解 JavaScript Promise](http://nodejs.cn/learn/understanding-javascript-promises) 和 [《ECMAScript6 入门》Promise 对象](https://es6.ruanyifeng.com/#docs/promise) 学习基于 Promise 或 Async/Await 的异步编程解决方案，以及 [前端面试题 1.4 Promise](https://juejin.im/post/6844904116339261447#heading-44) 练习相关题型*
 
+---
+
+#### Promise  
+
+ES2015 引入 promise 并进行了标准化。ES2017 拥有了 async/await 语法。
+
+Promisifying 技术：使用经典的 JavaScript 函数来接受回调并使其返回 promise:  
+```js
+const fs = require('fs')
+
+const getFile = (fileName) => {
+  return new Promise((resolve, reject) => {
+    fs.readFile(fileName, (err, data) => {
+      if (err) {
+        reject (err)  // 调用 `reject` 会导致 promise 失败，无论是否传入错误作为参数，
+        return        // 且不再进行下去。
+      }
+      resolve(data)
+    })
+  })
+}
+
+getFile('/etc/passwd')
+.then(data => console.log(data))
+.catch(err => console.error(err))
+```  
+最新版本的 Node.js 中，使用 [util 模块](http://nodejs.cn/api/util.html#util_util_promisify_original)的 promisifying 函数进行转换。
+
+#### async/await
+
+在任何函数之前加上 async 关键字意味着该函数会返回 promise。async/await 相比于 promise, 代码更简洁，也易于调试。

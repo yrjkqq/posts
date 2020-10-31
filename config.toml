@@ -1,4 +1,4 @@
-baseURL = "https://yrjkqq.github.io/posts/"
+baseURL = "https://yrjkqq.github.io/"
 languageCode = "en-us"
 title = "That's the Way It Is"
 # theme = "ananke"
@@ -13,8 +13,8 @@ pygmentscodefencesguesssyntax = true
 [params]
   mode = "auto"
   useCDN=false # don't use CDNs for fonts and icons, instead serve them locally.
-  favicon = "/posts/img/favicon.ico"
-  site_logo = "/posts/img/favicon.ico"
+  favicon = "/img/favicon.ico"
+  site_logo = "/img/favicon.ico"
 
 # Main menu Items
 

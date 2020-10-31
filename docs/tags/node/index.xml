@@ -2,18 +2,18 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Node on That&#39;s the Way It Is</title>
-    <link>https://yrjkqq.github.io/posts/tags/node/</link>
+    <link>https://yrjkqq.github.io/tags/node/</link>
     <description>Recent content in Node on That&#39;s the Way It Is</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>© yrjkqq</copyright>
-    <lastBuildDate>Wed, 02 Jan 2019 16:41:00 +0800</lastBuildDate><atom:link href="https://yrjkqq.github.io/posts/tags/node/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Wed, 02 Jan 2019 16:41:00 +0800</lastBuildDate><atom:link href="https://yrjkqq.github.io/tags/node/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>《深入浅出 Node.js》学习笔记</title>
-      <link>https://yrjkqq.github.io/posts/posts/00-understanding-nodejs-deeply/</link>
+      <link>https://yrjkqq.github.io/posts/00-understanding-nodejs-deeply/</link>
       <pubDate>Wed, 02 Jan 2019 16:41:00 +0800</pubDate>
       
-      <guid>https://yrjkqq.github.io/posts/posts/00-understanding-nodejs-deeply/</guid>
+      <guid>https://yrjkqq.github.io/posts/00-understanding-nodejs-deeply/</guid>
       <description>第 3 章 异步 I/O 异步 I/O 主要关注点在用户体验和资源分配。
 用户体验方面，异步方式在响应请求方面显著降低了同步请求的等待时间，由 M+N 降低为 max(M+N)。
 Node 利用单线程，解决了多线程编程模型中死锁、状态同步等问题，结合异步 I/O 解决了单线程串行依次执行编程模型因阻塞 I/O 导致资源得不到更优应用的问题。
