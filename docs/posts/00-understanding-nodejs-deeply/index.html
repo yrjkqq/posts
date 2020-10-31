@@ -18,7 +18,7 @@
 	<meta property="og:title" content="《深入浅出 Node.js》学习笔记" />
 <meta property="og:description" content="记录看 《深入浅出 Node.js》一书过程中遇到的知识点和问题，方便日后回顾。" />
 <meta property="og:type" content="article" />
-<meta property="og:url" content="https://yrjkqq.github.io/posts/posts/00.understanding-nodejs-deeply/" />
+<meta property="og:url" content="https://yrjkqq.github.io/posts/posts/00-understanding-nodejs-deeply/" />
 <meta property="article:published_time" content="2019-01-02T16:41:00+08:00" />
 <meta property="article:modified_time" content="2019-01-02T16:41:00+08:00" />
 <meta name="twitter:card" content="summary"/>
@@ -115,8 +115,57 @@ Node 借鉴浏览器 Web Workers 将 JS 执行和 UI 渲染分离更好利用多
 <p>使用 events 模块：</p>
 <ol>
 <li>继承 events 模块</li>
+<li>利用事件队列解决雪崩问题<br>
+雪崩问题：在高访问量、大并发量的情况下缓存失效的场景，此时大量请求涌入数据库中，数据库无法同时承受如此大的查询请求，进而影响到网站整体的响应速度。<br>
+once() 方法执行一次就会将监视器移除</li>
 </ol>
-<p><em>本章节剩余部分已经过时，移步 <a href="http://nodejs.cn/learn/understanding-javascript-promises">了解 JavaScript Promise</a> 和 <a href="https://es6.ruanyifeng.com/#docs/promise">《ECMAScript6 入门》Promise 对象</a> 学习基于 Promise 或 Async/Await 的异步编程解决方案</em></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-js" data-lang="js"><span style="color:#66d9ef">var</span> <span style="color:#a6e22e">events</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">require</span>(<span style="color:#e6db74">&#34;events&#34;</span>);
+
+<span style="color:#66d9ef">var</span> <span style="color:#a6e22e">proxy</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">events</span>.<span style="color:#a6e22e">EventEmitter</span>();
+<span style="color:#66d9ef">var</span> <span style="color:#a6e22e">status</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;ready&#34;</span>;
+<span style="color:#66d9ef">var</span> <span style="color:#a6e22e">select</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">function</span> (<span style="color:#a6e22e">callback</span>) {
+  <span style="color:#75715e">// 多次调用 select 会给 proxy 注册多个监听器
+</span><span style="color:#75715e"></span>  <span style="color:#a6e22e">proxy</span>.<span style="color:#a6e22e">once</span>(<span style="color:#e6db74">&#34;selected&#34;</span>, <span style="color:#a6e22e">callback</span>);
+  <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">status</span> <span style="color:#f92672">===</span> <span style="color:#e6db74">&#34;ready&#34;</span>) {
+    <span style="color:#a6e22e">status</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;pending&#34;</span>;
+    <span style="color:#a6e22e">db</span>.<span style="color:#a6e22e">select</span>(<span style="color:#e6db74">&#34;SQL&#34;</span>, <span style="color:#66d9ef">function</span> (<span style="color:#a6e22e">results</span>) {
+      <span style="color:#a6e22e">proxy</span>.<span style="color:#a6e22e">emit</span>(<span style="color:#e6db74">&#34;selected&#34;</span>, <span style="color:#a6e22e">results</span>);
+      <span style="color:#a6e22e">status</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;ready&#34;</span>;
+    });
+  }
+};
+</code></pre></div><ol start="3">
+<li>多异步之间的协作方案<br>
+异步编程中，也会出现事件与侦听器的关系是多对一的情况，也就是说一个业务逻辑可能依赖两个通过回调或事件传递的结果，此时可能导致难点2：回调地狱。</li>
+</ol>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-js" data-lang="js"><span style="color:#66d9ef">var</span> <span style="color:#a6e22e">after</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">function</span> (<span style="color:#a6e22e">times</span>, <span style="color:#a6e22e">callback</span>) {
+  <span style="color:#66d9ef">var</span> <span style="color:#a6e22e">count</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>,
+    <span style="color:#a6e22e">results</span> <span style="color:#f92672">=</span> {};
+  <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">function</span> (<span style="color:#a6e22e">key</span>, <span style="color:#a6e22e">value</span>) {
+    <span style="color:#a6e22e">results</span>[<span style="color:#a6e22e">key</span>] <span style="color:#f92672">=</span> <span style="color:#a6e22e">value</span>;
+    <span style="color:#a6e22e">count</span><span style="color:#f92672">++</span>;
+    <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">count</span> <span style="color:#f92672">===</span> <span style="color:#a6e22e">times</span>) {
+      <span style="color:#a6e22e">callback</span>(<span style="color:#a6e22e">result</span>);
+    }
+  };
+};
+<span style="color:#75715e">// 利用偏函数完成多对一的收敛
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">var</span> <span style="color:#a6e22e">done</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">after</span>(<span style="color:#a6e22e">times</span>, <span style="color:#a6e22e">render</span>);
+
+<span style="color:#66d9ef">var</span> <span style="color:#a6e22e">emitter</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">events</span>.<span style="color:#a6e22e">Emitter</span>();
+<span style="color:#75715e">// 利用事件订阅/发布模式完成一对多的发散
+</span><span style="color:#75715e"></span><span style="color:#a6e22e">emitter</span>.<span style="color:#a6e22e">on</span>(<span style="color:#e6db74">&#34;done&#34;</span>, <span style="color:#a6e22e">done</span>);
+<span style="color:#a6e22e">emitter</span>.<span style="color:#a6e22e">on</span>(<span style="color:#e6db74">&#34;done&#34;</span>, <span style="color:#a6e22e">other</span>);
+<span style="color:#a6e22e">fs</span>.<span style="color:#a6e22e">readFile</span>(<span style="color:#a6e22e">template_path</span>, <span style="color:#e6db74">&#34;utf8&#34;</span>, <span style="color:#66d9ef">function</span> (<span style="color:#a6e22e">err</span>, <span style="color:#a6e22e">template</span>) {
+  <span style="color:#a6e22e">emitter</span>.<span style="color:#a6e22e">emit</span>(<span style="color:#e6db74">&#34;done&#34;</span>, <span style="color:#e6db74">&#34;template&#34;</span>, <span style="color:#a6e22e">template</span>);
+});
+<span style="color:#a6e22e">db</span>.<span style="color:#a6e22e">query</span>(<span style="color:#a6e22e">sql</span>, <span style="color:#66d9ef">function</span> (<span style="color:#a6e22e">err</span>, <span style="color:#a6e22e">data</span>) {
+  <span style="color:#a6e22e">emitter</span>.<span style="color:#a6e22e">emit</span>(<span style="color:#e6db74">&#34;done&#34;</span>, <span style="color:#e6db74">&#34;data&#34;</span>, <span style="color:#a6e22e">data</span>);
+});
+<span style="color:#a6e22e">i10n</span>.<span style="color:#a6e22e">get</span>(<span style="color:#66d9ef">function</span> (<span style="color:#a6e22e">err</span>, <span style="color:#a6e22e">resources</span>) {
+  <span style="color:#a6e22e">emitter</span>.<span style="color:#a6e22e">emit</span>(<span style="color:#e6db74">&#34;done&#34;</span>, <span style="color:#e6db74">&#34;resources&#34;</span>, <span style="color:#a6e22e">resources</span>);
+});
+</code></pre></div><p><em>本章节剩余部分已经过时，移步 <a href="http://nodejs.cn/learn/understanding-javascript-promises">了解 JavaScript Promise</a> 和 <a href="https://es6.ruanyifeng.com/#docs/promise">《ECMAScript6 入门》Promise 对象</a> 学习基于 Promise 或 Async/Await 的异步编程解决方案</em></p>
 
 		</section>
 

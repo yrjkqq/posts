@@ -108,6 +108,57 @@ Node 借鉴浏览器 Web Workers 将 JS 执行和 UI 渲染分离更好利用多
 使用 events 模块：
 
 1. 继承 events 模块
+2. 利用事件队列解决雪崩问题  
+雪崩问题：在高访问量、大并发量的情况下缓存失效的场景，此时大量请求涌入数据库中，数据库无法同时承受如此大的查询请求，进而影响到网站整体的响应速度。  
+once() 方法执行一次就会将监视器移除  
+```js
+var events = require("events");
+
+var proxy = new events.EventEmitter();
+var status = "ready";
+var select = function (callback) {
+  // 多次调用 select 会给 proxy 注册多个监听器
+  proxy.once("selected", callback);
+  if (status === "ready") {
+    status = "pending";
+    db.select("SQL", function (results) {
+      proxy.emit("selected", results);
+      status = "ready";
+    });
+  }
+};
+```
+3. 多异步之间的协作方案  
+异步编程中，也会出现事件与侦听器的关系是多对一的情况，也就是说一个业务逻辑可能依赖两个通过回调或事件传递的结果，此时可能导致难点2：回调地狱。  
+```js
+var after = function (times, callback) {
+  var count = 0,
+    results = {};
+  return function (key, value) {
+    results[key] = value;
+    count++;
+    if (count === times) {
+      callback(result);
+    }
+  };
+};
+// 利用偏函数完成多对一的收敛
+var done = after(times, render);
+
+var emitter = new events.Emitter();
+// 利用事件订阅/发布模式完成一对多的发散
+emitter.on("done", done);
+emitter.on("done", other);
+fs.readFile(template_path, "utf8", function (err, template) {
+  emitter.emit("done", "template", template);
+});
+db.query(sql, function (err, data) {
+  emitter.emit("done", "data", data);
+});
+i10n.get(function (err, resources) {
+  emitter.emit("done", "resources", resources);
+});
+```
 
 *本章节剩余部分已经过时，移步 [了解 JavaScript Promise](http://nodejs.cn/learn/understanding-javascript-promises) 和 [《ECMAScript6 入门》Promise 对象](https://es6.ruanyifeng.com/#docs/promise) 学习基于 Promise 或 Async/Await 的异步编程解决方案*
 

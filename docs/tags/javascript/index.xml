@@ -7,31 +7,13 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>© yrjkqq</copyright>
-    <lastBuildDate>Sun, 08 Oct 2017 19:41:00 +0800</lastBuildDate><atom:link href="https://yrjkqq.github.io/posts/tags/javascript/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Fri, 08 Sep 2017 19:41:00 +0800</lastBuildDate><atom:link href="https://yrjkqq.github.io/posts/tags/javascript/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>JavaScript 的执行上下文和执行栈</title>
-      <link>https://yrjkqq.github.io/posts/posts/03.execution-context-copy-2/</link>
-      <pubDate>Sun, 08 Oct 2017 19:41:00 +0800</pubDate>
-      
-      <guid>https://yrjkqq.github.io/posts/posts/03.execution-context-copy-2/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>JavaScript 的执行上下文和执行栈</title>
-      <link>https://yrjkqq.github.io/posts/posts/03.execution-context-copy/</link>
-      <pubDate>Sun, 08 Oct 2017 19:41:00 +0800</pubDate>
-      
-      <guid>https://yrjkqq.github.io/posts/posts/03.execution-context-copy/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>JavaScript 的执行上下文和执行栈</title>
-      <link>https://yrjkqq.github.io/posts/posts/03.execution-context/</link>
+      <link>https://yrjkqq.github.io/posts/posts/03-execution-context/</link>
       <pubDate>Fri, 08 Sep 2017 19:41:00 +0800</pubDate>
       
-      <guid>https://yrjkqq.github.io/posts/posts/03.execution-context/</guid>
+      <guid>https://yrjkqq.github.io/posts/posts/03-execution-context/</guid>
       <description>参考
 Understanding Execution Context and Execution Stack in Javascript
 JavaScript深入之词法作用域和动态作用域

@@ -10,10 +10,10 @@
     <lastBuildDate>Wed, 02 Jan 2019 16:41:00 +0800</lastBuildDate><atom:link href="https://yrjkqq.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>《深入浅出 Node.js》学习笔记</title>
-      <link>https://yrjkqq.github.io/posts/posts/00.understanding-nodejs-deeply/</link>
+      <link>https://yrjkqq.github.io/posts/posts/00-understanding-nodejs-deeply/</link>
       <pubDate>Wed, 02 Jan 2019 16:41:00 +0800</pubDate>
       
-      <guid>https://yrjkqq.github.io/posts/posts/00.understanding-nodejs-deeply/</guid>
+      <guid>https://yrjkqq.github.io/posts/posts/00-understanding-nodejs-deeply/</guid>
       <description>第 3 章 异步 I/O 异步 I/O 主要关注点在用户体验和资源分配。
 用户体验方面，异步方式在响应请求方面显著降低了同步请求的等待时间，由 M+N 降低为 max(M+N)。
 Node 利用单线程，解决了多线程编程模型中死锁、状态同步等问题，结合异步 I/O 解决了单线程串行依次执行编程模型因阻塞 I/O 导致资源得不到更优应用的问题。
@@ -29,10 +29,10 @@ Node 如何实现异步 I/O 完成整个异步 I/O 环节的有事件循环、�
     
     <item>
       <title>极客时间《数据结构与算法之美》学习笔记</title>
-      <link>https://yrjkqq.github.io/posts/posts/01.geekbang-algs-beauty/</link>
+      <link>https://yrjkqq.github.io/posts/posts/01-geekbang-algs-beauty/</link>
       <pubDate>Mon, 08 Oct 2018 19:41:00 +0800</pubDate>
       
-      <guid>https://yrjkqq.github.io/posts/posts/01.geekbang-algs-beauty/</guid>
+      <guid>https://yrjkqq.github.io/posts/posts/01-geekbang-algs-beauty/</guid>
       <description> 为什么要学习算法？建立时空复杂度意识、写出高性能的代码，能够设计基础架构，提升编程技能，训练逻辑思维。
  数据结构就是一组数据的存储方式，而算法则是操作数据的一组方法，比如队列、栈、堆、二分查找、动态规划等。
 算法学习重点：
@@ -53,39 +53,21 @@ Node 如何实现异步 I/O 完成整个异步 I/O 环节的有事件循环、�
     </item>
     
     <item>
-      <title>JavaScript 的执行上下文和执行栈</title>
-      <link>https://yrjkqq.github.io/posts/posts/03.execution-context-copy-2/</link>
-      <pubDate>Sun, 08 Oct 2017 19:41:00 +0800</pubDate>
-      
-      <guid>https://yrjkqq.github.io/posts/posts/03.execution-context-copy-2/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>JavaScript 的执行上下文和执行栈</title>
-      <link>https://yrjkqq.github.io/posts/posts/03.execution-context-copy/</link>
-      <pubDate>Sun, 08 Oct 2017 19:41:00 +0800</pubDate>
-      
-      <guid>https://yrjkqq.github.io/posts/posts/03.execution-context-copy/</guid>
-      <description></description>
-    </item>
-    
-    <item>
       <title>基础数学知识</title>
-      <link>https://yrjkqq.github.io/posts/posts/02.basic-mathmaticth/</link>
+      <link>https://yrjkqq.github.io/posts/posts/02-basic-mathmaticth/</link>
       <pubDate>Sun, 08 Oct 2017 19:41:00 +0800</pubDate>
       
-      <guid>https://yrjkqq.github.io/posts/posts/02.basic-mathmaticth/</guid>
+      <guid>https://yrjkqq.github.io/posts/posts/02-basic-mathmaticth/</guid>
       <description>概率相关 独立事件
 代数 对数中换底公式用于计算对数时间复杂度。</description>
     </item>
     
     <item>
       <title>JavaScript 的执行上下文和执行栈</title>
-      <link>https://yrjkqq.github.io/posts/posts/03.execution-context/</link>
+      <link>https://yrjkqq.github.io/posts/posts/03-execution-context/</link>
       <pubDate>Fri, 08 Sep 2017 19:41:00 +0800</pubDate>
       
-      <guid>https://yrjkqq.github.io/posts/posts/03.execution-context/</guid>
+      <guid>https://yrjkqq.github.io/posts/posts/03-execution-context/</guid>
       <description>参考
 Understanding Execution Context and Execution Stack in Javascript
 JavaScript深入之词法作用域和动态作用域
