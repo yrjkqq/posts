@@ -3,7 +3,17 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
-    <loc>https://yrjkqq.github.io/tags/node/</loc>
+    <loc>https://yrjkqq.github.io/posts/tags/node/</loc>
+    <lastmod>2019-01-02T16:41:00+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://yrjkqq.github.io/posts/posts/</loc>
+    <lastmod>2019-01-02T16:41:00+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://yrjkqq.github.io/posts/tags/</loc>
     <lastmod>2019-01-02T16:41:00+08:00</lastmod>
   </url>
   
@@ -13,57 +23,47 @@
   </url>
   
   <url>
-    <loc>https://yrjkqq.github.io/tags/</loc>
+    <loc>https://yrjkqq.github.io/posts/posts/00-understanding-nodejs-deeply/</loc>
     <lastmod>2019-01-02T16:41:00+08:00</lastmod>
   </url>
   
   <url>
-    <loc>https://yrjkqq.github.io/</loc>
-    <lastmod>2019-01-02T16:41:00+08:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://yrjkqq.github.io/posts/00-understanding-nodejs-deeply/</loc>
-    <lastmod>2019-01-02T16:41:00+08:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://yrjkqq.github.io/tags/algs/</loc>
+    <loc>https://yrjkqq.github.io/posts/tags/algs/</loc>
     <lastmod>2018-10-08T19:41:00+08:00</lastmod>
   </url>
   
   <url>
-    <loc>https://yrjkqq.github.io/posts/01-geekbang-algs-beauty/</loc>
+    <loc>https://yrjkqq.github.io/posts/posts/01-geekbang-algs-beauty/</loc>
     <lastmod>2018-10-08T19:41:00+08:00</lastmod>
   </url>
   
   <url>
-    <loc>https://yrjkqq.github.io/tags/math/</loc>
+    <loc>https://yrjkqq.github.io/posts/posts/04-promise/</loc>
+    <lastmod>2018-09-08T19:41:00+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://yrjkqq.github.io/posts/tags/javascript/</loc>
+    <lastmod>2018-09-08T19:41:00+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://yrjkqq.github.io/posts/tags/math/</loc>
     <lastmod>2017-10-08T19:41:00+08:00</lastmod>
   </url>
   
   <url>
-    <loc>https://yrjkqq.github.io/posts/02-basic-mathmaticth/</loc>
+    <loc>https://yrjkqq.github.io/posts/posts/02-basic-mathmaticth/</loc>
     <lastmod>2017-10-08T19:41:00+08:00</lastmod>
   </url>
   
   <url>
-    <loc>https://yrjkqq.github.io/tags/javascript/</loc>
+    <loc>https://yrjkqq.github.io/posts/posts/03-execution-context/</loc>
     <lastmod>2017-09-08T19:41:00+08:00</lastmod>
   </url>
   
   <url>
-    <loc>https://yrjkqq.github.io/posts/03-execution-context/</loc>
-    <lastmod>2017-09-08T19:41:00+08:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://yrjkqq.github.io/posts/04-promise/</loc>
-    <lastmod>2017-09-08T19:41:00+08:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://yrjkqq.github.io/categories/</loc>
+    <loc>https://yrjkqq.github.io/posts/categories/</loc>
   </url>
   
 </urlset>

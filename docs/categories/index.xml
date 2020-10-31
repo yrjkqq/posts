@@ -2,10 +2,10 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Categories on That&#39;s the Way It Is</title>
-    <link>https://yrjkqq.github.io/categories/</link>
+    <link>https://yrjkqq.github.io/posts/categories/</link>
     <description>Recent content in Categories on That&#39;s the Way It Is</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <copyright>© yrjkqq</copyright><atom:link href="https://yrjkqq.github.io/categories/index.xml" rel="self" type="application/rss+xml" />
+    <copyright>© yrjkqq</copyright><atom:link href="https://yrjkqq.github.io/posts/categories/index.xml" rel="self" type="application/rss+xml" />
   </channel>
 </rss>

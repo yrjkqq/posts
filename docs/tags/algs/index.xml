@@ -2,18 +2,18 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Algs on That&#39;s the Way It Is</title>
-    <link>https://yrjkqq.github.io/tags/algs/</link>
+    <link>https://yrjkqq.github.io/posts/tags/algs/</link>
     <description>Recent content in Algs on That&#39;s the Way It Is</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>© yrjkqq</copyright>
-    <lastBuildDate>Mon, 08 Oct 2018 19:41:00 +0800</lastBuildDate><atom:link href="https://yrjkqq.github.io/tags/algs/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Mon, 08 Oct 2018 19:41:00 +0800</lastBuildDate><atom:link href="https://yrjkqq.github.io/posts/tags/algs/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>极客时间《数据结构与算法之美》学习笔记</title>
-      <link>https://yrjkqq.github.io/posts/01-geekbang-algs-beauty/</link>
+      <link>https://yrjkqq.github.io/posts/posts/01-geekbang-algs-beauty/</link>
       <pubDate>Mon, 08 Oct 2018 19:41:00 +0800</pubDate>
       
-      <guid>https://yrjkqq.github.io/posts/01-geekbang-algs-beauty/</guid>
+      <guid>https://yrjkqq.github.io/posts/posts/01-geekbang-algs-beauty/</guid>
       <description> 为什么要学习算法？建立时空复杂度意识、写出高性能的代码，能够设计基础架构，提升编程技能，训练逻辑思维。
  数据结构就是一组数据的存储方式，而算法则是操作数据的一组方法，比如队列、栈、堆、二分查找、动态规划等。
 算法学习重点：

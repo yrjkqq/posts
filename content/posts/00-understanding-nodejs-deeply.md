@@ -193,3 +193,5 @@ getFile('/etc/passwd')
 #### async/await
 
 在任何函数之前加上 async 关键字意味着该函数会返回 promise。async/await 相比于 promise, 代码更简洁，也易于调试。
+
+*剩余内容参见[promise](../04-promise)*

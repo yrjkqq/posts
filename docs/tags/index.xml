@@ -2,45 +2,45 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Tags on That&#39;s the Way It Is</title>
-    <link>https://yrjkqq.github.io/tags/</link>
+    <link>https://yrjkqq.github.io/posts/tags/</link>
     <description>Recent content in Tags on That&#39;s the Way It Is</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>© yrjkqq</copyright>
-    <lastBuildDate>Wed, 02 Jan 2019 16:41:00 +0800</lastBuildDate><atom:link href="https://yrjkqq.github.io/tags/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Wed, 02 Jan 2019 16:41:00 +0800</lastBuildDate><atom:link href="https://yrjkqq.github.io/posts/tags/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Node</title>
-      <link>https://yrjkqq.github.io/tags/node/</link>
+      <link>https://yrjkqq.github.io/posts/tags/node/</link>
       <pubDate>Wed, 02 Jan 2019 16:41:00 +0800</pubDate>
       
-      <guid>https://yrjkqq.github.io/tags/node/</guid>
+      <guid>https://yrjkqq.github.io/posts/tags/node/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Algs</title>
-      <link>https://yrjkqq.github.io/tags/algs/</link>
+      <link>https://yrjkqq.github.io/posts/tags/algs/</link>
       <pubDate>Mon, 08 Oct 2018 19:41:00 +0800</pubDate>
       
-      <guid>https://yrjkqq.github.io/tags/algs/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Math</title>
-      <link>https://yrjkqq.github.io/tags/math/</link>
-      <pubDate>Sun, 08 Oct 2017 19:41:00 +0800</pubDate>
-      
-      <guid>https://yrjkqq.github.io/tags/math/</guid>
+      <guid>https://yrjkqq.github.io/posts/tags/algs/</guid>
       <description></description>
     </item>
     
     <item>
       <title>JavaScript</title>
-      <link>https://yrjkqq.github.io/tags/javascript/</link>
-      <pubDate>Fri, 08 Sep 2017 19:41:00 +0800</pubDate>
+      <link>https://yrjkqq.github.io/posts/tags/javascript/</link>
+      <pubDate>Sat, 08 Sep 2018 19:41:00 +0800</pubDate>
       
-      <guid>https://yrjkqq.github.io/tags/javascript/</guid>
+      <guid>https://yrjkqq.github.io/posts/tags/javascript/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Math</title>
+      <link>https://yrjkqq.github.io/posts/tags/math/</link>
+      <pubDate>Sun, 08 Oct 2017 19:41:00 +0800</pubDate>
+      
+      <guid>https://yrjkqq.github.io/posts/tags/math/</guid>
       <description></description>
     </item>
     
