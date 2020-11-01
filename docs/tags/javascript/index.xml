@@ -7,7 +7,21 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>© yrjkqq</copyright>
-    <lastBuildDate>Sat, 08 Sep 2018 19:41:00 +0800</lastBuildDate><atom:link href="https://yrjkqq.github.io/posts/tags/javascript/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Tue, 12 May 2020 09:45:00 +0800</lastBuildDate><atom:link href="https://yrjkqq.github.io/posts/tags/javascript/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Next.js 源码阅读</title>
+      <link>https://yrjkqq.github.io/posts/posts/05-nextjs-srouce-code/</link>
+      <pubDate>Tue, 12 May 2020 09:45:00 +0800</pubDate>
+      
+      <guid>https://yrjkqq.github.io/posts/posts/05-nextjs-srouce-code/</guid>
+      <description>前言 Next.js 官方文档不是很详细，一些细节部分需要深入到源码中，才能知其所以然。按照官方贡献指南 Fork 项目到自己的仓库，然后 clone 下来。以最新的 canary 分支版本 10.0.1-canary.4 为基础。
+项目结构 深入到源码之前，先摸清楚整个项目的结构。
+源码中使用 lerna 在 packages 目录下放置了多个包，每个包有自己的 package.json 文件。使用类似 learn run command 的命令时，会同时运行 packages 目录所有包中可以运行该 command 的命令。
+目录结构：
+ .vscode 目录下放置了 vscode 相关的配置文件。 bench 目录放置了运行 benchmarks 的代码和文档。 docs 目录下是官方文档。 errors 目录下使用了 Next.js 过程中可能会遇到的错误，记录了错误发生的原因和解决方法。 examples 目录下放置了 Next.js 的用法，或是与各种第三方库或框架结合使用的样例代码 packages 源代码目录，后面主要是阅读这里面的代码 test 测试代码和测试用例  其他比较重要的文件：
+ .eslintrc.json ESLint 的配置文件 .prettierrc.json Prettier 的配置文件 jest.config.js 测试框架 jest 的配置文件 lerna.json lerna 的配置文件 package.json 包描述文件，记录了所有可以运行的脚本  阅读前准备 按照官方贡献指南，安装完依赖后，运行 node --inspect packages/next/dist/bin/next dev test/integration/basic 没有报错，然后打开 http://localhost:3000/about 查看页面正常，就安装运行完成。</description>
+    </item>
+    
     <item>
       <title>ES2015 标准化的 promise</title>
       <link>https://yrjkqq.github.io/posts/posts/04-promise/</link>
