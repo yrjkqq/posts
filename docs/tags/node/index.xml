@@ -23,11 +23,20 @@
     </item>
     
     <item>
-      <title>《深入浅出 Node.js》学习笔记</title>
-      <link>https://yrjkqq.github.io/posts/posts/00-understanding-nodejs-deeply/</link>
+      <title>《深入浅出 Node.js》学习笔记 Part2</title>
+      <link>https://yrjkqq.github.io/posts/posts/00-understanding-nodejs-deeply-part2/</link>
+      <pubDate>Wed, 09 Jan 2019 16:41:00 +0800</pubDate>
+      
+      <guid>https://yrjkqq.github.io/posts/posts/00-understanding-nodejs-deeply-part2/</guid>
+      <description>第 3 章 理解 Buffer </description>
+    </item>
+    
+    <item>
+      <title>《深入浅出 Node.js》学习笔记 Part1</title>
+      <link>https://yrjkqq.github.io/posts/posts/00-understanding-nodejs-deeply-part1/</link>
       <pubDate>Wed, 02 Jan 2019 16:41:00 +0800</pubDate>
       
-      <guid>https://yrjkqq.github.io/posts/posts/00-understanding-nodejs-deeply/</guid>
+      <guid>https://yrjkqq.github.io/posts/posts/00-understanding-nodejs-deeply-part1/</guid>
       <description>第 3 章 异步 I/O 异步 I/O 主要关注点在用户体验和资源分配。
 用户体验方面，异步方式在响应请求方面显著降低了同步请求的等待时间，由 M+N 降低为 max(M+N)。
 Node 利用单线程，解决了多线程编程模型中死锁、状态同步等问题，结合异步 I/O 解决了单线程串行依次执行编程模型因阻塞 I/O 导致资源得不到更优应用的问题。
@@ -39,6 +48,19 @@ Node 如何实现异步 I/O 完成整个异步 I/O 环节的有事件循环、�
 事件循环：Node 自身的执行模型。在进程启动时，Node 便会创建一个类似于 while(true) 的循环，每执行一次循环体的过程我们成为 Tick。每个 Tick 的过程就是查看是否有事件等待处理，如果有则取出事件和对应的回调函数。如果存在关联的回调函数，就执行。然后进入下个循环，直到不再有事件处理。
 每个事件循环有一个或多个观察者，而判断是否有事件要处理的过程则是向这些观察者询问是否有要处理的事件。
 生产者/消费者模型：异步 I/O、网络请求等则是事件的生产者，为 Node 提供不同类型的事件，这些时间被传递到对应的观察者那里，事件循环则从观察者那里取出事件并处理。</description>
+    </item>
+    
+    <item>
+      <title>Node.js 中的 stream</title>
+      <link>https://yrjkqq.github.io/posts/posts/06-nodejs-stream/</link>
+      <pubDate>Sat, 08 Sep 2018 19:41:00 +0800</pubDate>
+      
+      <guid>https://yrjkqq.github.io/posts/posts/06-nodejs-stream/</guid>
+      <description>stream 模块用于构建实现了流接口的对象。Node.js 提供了多种流对象。流可以是可读的、可写的、或者可读可写的。所有的流都是 EventEmitter 的实例。
+流的类型：
+ Writable 可写入数据的流，如 fs.createWriteStream() Readable 可读取数据的流，如 fs.createReadStream() Duplex 可读又可写的流，如 net.Socket Transform 在读写过程中可以修改或转换数据的 Duplex 流，如 zlib.createDeflate()  Node.js 创建的流都是运行在字符串和 Buffer (或 Uint8Array) 上。流的实现也可以使用其他类型的 JavaScript 值（除了 null）。
+使用 stream 实现的 http 服务器:
+import http from &amp;#34;http&amp;#34;; const server = http.createServer(function (req, res) { // req 是一个 http.IncomingMessage 实例，是可读流  // res 是一个 http.ServerResponse 实例，是可写流  let body = &amp;#34;&amp;#34;; // 接收数据为 utf8 字符串  // 如果没有设置字符编码，则会接收到 Buffer 对象  req.</description>
     </item>
     
   </channel>

@@ -1,7 +1,7 @@
 ---
-title: "《深入浅出 Node.js》学习笔记"
+title: "《深入浅出 Node.js》学习笔记 Part1"
 date: 2019-01-02T16:41:00+08:00
-description: "记录看 《深入浅出 Node.js》一书过程中遇到的知识点和问题，方便日后回顾。"
+description: "异步 I/O, 异步编程，内存控制"
 draft: false
 tags: [Node]
 ---
@@ -253,4 +253,100 @@ for (var i = 0; i < 1000000; i++) {
 
 ### 高效使用内存
 
- 
+#### 作用域
+
+调用函数时会创建对应的作用域，执行结束后销毁作用域。作用域中声明的局部变量也随着作用域的销毁而销毁。只被局部变量引用的对象存活周期较短，将会被分配在新生代中，下次垃圾回收时被释放。
+
+全局作用域需要直到进程退出后才能释放，其中的全局变量引用的对象常驻在老生代内存中。
+
+变量的主动释放：通过 delete 操作符来删除引用关系，或是将变量重新赋值，让旧的对象脱离引用关系。
+
+闭包：实现外部作用域访问内部作用域中变量的方法叫做闭包。  
+```js
+var foo = function() {
+  var bar = function() {
+    var local = "内部变量";
+    return function() {
+      return local;
+    }
+  }
+  var baz = bar()
+  console.log(baz())
+}
+```  
+闭包的问题在于一旦有变量引用这个中间函数，这个中间函数将不会释放，同时也会使原始的作用域不会得到释放，作用域中产生的内存占用也不会得到释放。
+
+#### 内存指标
+
+没有被回收的对象不断增长会导致内存占用无线增长，达到 V8 的内存限制后就会得到内存溢出错误，进而导致进程退出。
+
+查看进程的内存占用：
+```js
+> process.memoryUsage()
+{
+  rss: 24821760,
+  heapTotal: 5046272,
+  heapUsed: 3322952,
+  external: 1633208,
+  arrayBuffers: 386230
+}
+```
+rss 是 resident set size 的缩写，即进程的常驻内存部分。heapTotal 和 headUsed 对应的是 V8 的堆内存信息。heapTotal 是堆中总共申请的内存量，headUsed 表示目前我们堆中使用的内存量。单位都是字节。
+
+本机上当 heapTotal 达到 headTotal 4195.41MB 是会出现内存溢出。  
+```js
+<--- Last few GCs --->
+
+[22132:000002AE5F551500]     1973 ms: Scavenge 3842.5 (3875.9) -> 3842.5 (3875.9) MB4.3 / 0.0 ms  (average mu = 1.000, current mu = 1.000) allocation failure
+[22132:000002AE5F551500]     2089 ms: Mark-sweep 4002.5 (4035.9) -> 4001.9 (4035.4)  49.8 / 0.0 ms  (+ 62.7 ms in 23 steps since start of marking, biggest step 5.5 ms, ltime since start of marking 1901 ms) (average mu = 1.000, current mu = 1.000) al   
+
+<--- JS stacktrace --->
+
+FATAL ERROR: MarkCompactCollector: young object promotion failed Allocation failed -vaScript heap out of memory
+ 1: 00007FF77B201DDF napi_wrap+109135
+ 2: 00007FF77B1A6D06 v8::internal::OrderedHashTable<v8::internal::OrderedHashSet,1>:mberOfElementsOffset+3335
+```
+
+查看系统的内存占用：  
+os 模块的 `totalmem()` 和 `freemem()` 两个方法用于查看操作系统的内存占用情况，分别返回系统的总内存和闲置内存，以字节为单位。
+```js
+> os.totalmem()/1024/1024/1024
+15.903568267822266
+> os.freemem()/1024/1024/1024
+5.802955627441406
+> process.memoryUsage().rss/1024/1024/1024
+0.0236968994140625
+```
+
+堆中的内存用量总是小于进程的常驻内存用量，意味着 Node 中的内存并非都是通过 V8 进行分配的，将那些不是通过 V8 分配的内存成为**堆外内存**。
+
+Buffer 对象不同于其他对象，不经过 V8 的内存分配机制，不会有堆内存的大小限制。由于 Node 并不同于浏览器的应用场景，浏览器中 JavaScript 直接处理字符串即可满足大部分业务场景，而 Node 则需要网络流和文件 I/O 流，操作字符串远不能满足传输的性能需求。
+
+#### 内存泄漏
+
+内存泄漏的实质：应当回收的对象出现意外而没有被回收，变成了常驻在老生代中的对象。
+
+内存泄露的原因：  
+1. 缓存  
+   缓存中的对象常驻在老生代中，不会被垃圾回收。  
+   使用对象做为缓存时，需要加入策略来限制缓存的无限增长。参考 LRU 算法的实现。  
+   模块机制：为了加速模块引入，所有模块都会通过编译执行，然后被缓存。而且通过 exports 导出的函数，可以访问模块中的私有变量，这样文件模块在文件编译执行后形成的作用域因为模块缓存的原因，不会被释放。模块是常驻在老生代中的。设计模块时需要提供接口，以便调用者主动释放内存。
+
+   解决方案：内存做为缓存，除了需要限制大小外，也无法在进程之间共享。通过使用进程外缓存，Node 可以减少常驻内存的对象的数量，让垃圾回收更高效，同时进程间也可以共享缓存。可以使用 Redis.  
+2. 队列消费不及时  
+   消费者-生产者模型中，消费速度低于生产速度，将会形成堆积。比如往数据库写入数据，突然间写入大量数据将会造成阻塞，JavaScript 中相关的作用域也不会得到释放，内存泄露。
+
+   解决方案：1. 换用消费速度更高的技术。2. 监控队列的长度。3. 为异步调用加入超时机制，为消费速度设置下限值。
+3. 作用域未释放
+   代码中闭包使用太多，会导致作用域过长，无法及时释放变量。
+
+#### 内存泄漏排查
+
+工具：  
+- v8-profiler 四年没有维护
+- node-heapdump 对 V8 堆内存抓取快照，用于事后分析
+- [@airbnb/node-memwatch](https://www.npmjs.com/package/@airbnb/node-memwatch)
+
+#### 大内存应用
+
+使用 stream 模块用于操作大文件。
