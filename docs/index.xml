@@ -28,7 +28,13 @@
       <pubDate>Wed, 09 Jan 2019 16:41:00 +0800</pubDate>
       
       <guid>https://yrjkqq.github.io/posts/posts/00-understanding-nodejs-deeply-part2/</guid>
-      <description>第 3 章 理解 Buffer </description>
+      <description>第 6 章 理解 Buffer 在 Node 中，应用需要处理网络协议、操作数据库、处理图片、接受文件上传等，在网络流和文件的操作中，还要处理大量二进制数据，JavaScript 自有的字符串远远不能满足这些需求，于是有了 Buffer.
+Buffer 结构 Buffer 类似于 Array, 但主要用于操作字节。Buffer 是一个由 JavaScript 和 C++ 结合的模块，C++ 实现性能相关的部分。Buffer 所占用的内存不通过 V8 分配，属于堆外内存，有更高效和专用的内存分配策略。Buffer 位于全局对象 global 上，无需导入。
+Buffer 内存分配：在 C++ 层面申请内存，在 JavaScript 上分配内存。当进行小而频繁的 Buffer 操作时，采用 slab 的机制进行预先申请和时候分配，使得 JavaScript 到操作系统之间不必有过多的内存申请方面的系统调用。大块的 Buffer 直接调用 C++ 层面提供的内存。
+Buffer 的转换 字符串 -&amp;gt; Buffer 对象：Buffer.from(string[, encoding]) encoding 默认为 &amp;lsquo;utf8&amp;rsquo;. 一个 Buffer 对象可以存储不同编码类型的字符串转码的值，调用 write() 方法实现。
+Buffer 对象 -&amp;gt; 字符串：buf.toString([encoding[, start[, end]]])
+Buffer 支持的编码类型：Buffer 与字符编码
+ 字符编码：utf8 utf16le latin1 二进制转文本的编码：base64 hex 传统的字符串编码：ascii binary ucs2  Buffer 的拼接 从常见的输入流从读取内容的示例代码：</description>
     </item>
     
     <item>
