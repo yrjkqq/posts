@@ -7,7 +7,27 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>© yrjkqq</copyright>
-    <lastBuildDate>Tue, 12 May 2020 09:45:00 +0800</lastBuildDate><atom:link href="https://yrjkqq.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Thu, 05 Nov 2020 15:30:00 +0800</lastBuildDate><atom:link href="https://yrjkqq.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>child_process, cluster, worker_threads 模块</title>
+      <link>https://yrjkqq.github.io/posts/posts/08-child_processclusterworker_threads/</link>
+      <pubDate>Thu, 05 Nov 2020 15:30:00 +0800</pubDate>
+      
+      <guid>https://yrjkqq.github.io/posts/posts/08-child_processclusterworker_threads/</guid>
+      <description>worker_threads 模块：https://nodejs.org/dist/latest-v14.x/docs/api/worker_threads.html</description>
+    </item>
+    
+    <item>
+      <title>URL 模块和 querystring 模块</title>
+      <link>https://yrjkqq.github.io/posts/posts/07-url-urlsearchparams-querystring/</link>
+      <pubDate>Thu, 05 Nov 2020 15:30:00 +0800</pubDate>
+      
+      <guid>https://yrjkqq.github.io/posts/posts/07-url-urlsearchparams-querystring/</guid>
+      <description>url 模块提供了解析 URL 的工具。```const url = require(&amp;lsquo;url&amp;rsquo;)`
+url 模块提供了两套 API:
+ legacy API, Node.js 特有 WHATWG URL Standard, 用于 web 浏览器  // WHATWG API const myURL = new URL(&amp;#39;https://user:pass@sub.example.com:8080/p/a/t/h?query=string#hash&amp;#39;); /** &amp;gt; myURL URL { href: &amp;#39;https://user:pass@sub.example.com:8080/p/a/t/h?query=string#hash&amp;#39;, origin: &amp;#39;https://sub.example.com:8080&amp;#39;, protocol: &amp;#39;https:&amp;#39;, username: &amp;#39;user&amp;#39;, password: &amp;#39;pass&amp;#39;, host: &amp;#39;sub.example.com:8080&amp;#39;, hostname: &amp;#39;sub.example.com&amp;#39;, port: &amp;#39;8080&amp;#39;, pathname: &amp;#39;/p/a/t/h&amp;#39;, search: &amp;#39;?query=string&amp;#39;, searchParams: URLSearchParams { &amp;#39;query&amp;#39; =&amp;gt; &amp;#39;string&amp;#39; }, hash: &amp;#39;#hash&amp;#39; } */ // Legacy API const url = require(&amp;#39;url&amp;#39;); const myURL = url.</description>
+    </item>
+    
     <item>
       <title>Next.js 源码阅读</title>
       <link>https://yrjkqq.github.io/posts/posts/05-nextjs-srouce-code/</link>
