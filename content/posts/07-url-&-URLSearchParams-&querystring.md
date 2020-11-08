@@ -6,7 +6,7 @@ draft: false
 tags: [Node]
 ---
 
-url 模块提供了解析 URL 的工具。```const url = require('url')`
+url 模块提供了解析 URL 的工具。`const url = require('url')`
 
 url 模块提供了两套 [API](https://nodejs.org/dist/latest-v14.x/docs/api/url.html#url_url_strings_and_url_objects):  
 - legacy API, Node.js 特有

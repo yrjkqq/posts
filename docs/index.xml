@@ -9,21 +9,12 @@
     <copyright>© yrjkqq</copyright>
     <lastBuildDate>Thu, 05 Nov 2020 15:30:00 +0800</lastBuildDate><atom:link href="https://yrjkqq.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
     <item>
-      <title>child_process, cluster, worker_threads 模块</title>
-      <link>https://yrjkqq.github.io/posts/posts/08-child_processclusterworker_threads/</link>
-      <pubDate>Thu, 05 Nov 2020 15:30:00 +0800</pubDate>
-      
-      <guid>https://yrjkqq.github.io/posts/posts/08-child_processclusterworker_threads/</guid>
-      <description>worker_threads 模块：https://nodejs.org/dist/latest-v14.x/docs/api/worker_threads.html</description>
-    </item>
-    
-    <item>
       <title>URL 模块和 querystring 模块</title>
       <link>https://yrjkqq.github.io/posts/posts/07-url-urlsearchparams-querystring/</link>
       <pubDate>Thu, 05 Nov 2020 15:30:00 +0800</pubDate>
       
       <guid>https://yrjkqq.github.io/posts/posts/07-url-urlsearchparams-querystring/</guid>
-      <description>url 模块提供了解析 URL 的工具。```const url = require(&amp;lsquo;url&amp;rsquo;)`
+      <description>url 模块提供了解析 URL 的工具。const url = require(&#39;url&#39;)
 url 模块提供了两套 API:
  legacy API, Node.js 特有 WHATWG URL Standard, 用于 web 浏览器  // WHATWG API const myURL = new URL(&amp;#39;https://user:pass@sub.example.com:8080/p/a/t/h?query=string#hash&amp;#39;); /** &amp;gt; myURL URL { href: &amp;#39;https://user:pass@sub.example.com:8080/p/a/t/h?query=string#hash&amp;#39;, origin: &amp;#39;https://sub.example.com:8080&amp;#39;, protocol: &amp;#39;https:&amp;#39;, username: &amp;#39;user&amp;#39;, password: &amp;#39;pass&amp;#39;, host: &amp;#39;sub.example.com:8080&amp;#39;, hostname: &amp;#39;sub.example.com&amp;#39;, port: &amp;#39;8080&amp;#39;, pathname: &amp;#39;/p/a/t/h&amp;#39;, search: &amp;#39;?query=string&amp;#39;, searchParams: URLSearchParams { &amp;#39;query&amp;#39; =&amp;gt; &amp;#39;string&amp;#39; }, hash: &amp;#39;#hash&amp;#39; } */ // Legacy API const url = require(&amp;#39;url&amp;#39;); const myURL = url.</description>
     </item>
@@ -40,6 +31,37 @@ url 模块提供了两套 API:
 目录结构：
  .vscode 目录下放置了 vscode 相关的配置文件。 bench 目录放置了运行 benchmarks 的代码和文档。 docs 目录下是官方文档。 errors 目录下使用了 Next.js 过程中可能会遇到的错误，记录了错误发生的原因和解决方法。 examples 目录下放置了 Next.js 的用法，或是与各种第三方库或框架结合使用的样例代码 packages 源代码目录，后面主要是阅读这里面的代码 test 测试代码和测试用例  其他比较重要的文件：
  .eslintrc.json ESLint 的配置文件 .prettierrc.json Prettier 的配置文件 jest.config.js 测试框架 jest 的配置文件 lerna.json lerna 的配置文件 package.json 包描述文件，记录了所有可以运行的脚本  阅读前准备 按照官方贡献指南，安装完依赖后，运行 node --inspect packages/next/dist/bin/next dev test/integration/basic 没有报错，然后打开 http://localhost:3000/about 查看页面正常，就安装运行完成。</description>
+    </item>
+    
+    <item>
+      <title>《深入浅出 Node.js》学习笔记 Part4</title>
+      <link>https://yrjkqq.github.io/posts/posts/00-understanding-nodejs-deeply-part4/</link>
+      <pubDate>Fri, 18 Jan 2019 21:41:00 +0800</pubDate>
+      
+      <guid>https://yrjkqq.github.io/posts/posts/00-understanding-nodejs-deeply-part4/</guid>
+      <description>第 10 章 测试 略。
+第 11 章 产品化 项目工程化：
+ 目录结构 Project Structure Practices 构建工具 Grunt 编码规范 ESLint 代码审查  部署流程
+性能：
+ 动静分离：Nginx CDN 启用缓存：Redis 多进程架构：官方 process_child cluster 模块，社区的 pm2 模块进行进程管理 读写分离：数据库读写分离  日志：
+ winston 库  监控报警：
+ 日志监控 响应时间 进程监控 磁盘监控 内存监控 CPU 占用监控 CPU load 监控 I/O 负载 网络监控 应用状态监控 DNS 监控  报警：
+ 邮件报警：nodemailer 模块发送邮件 短信或电话报警  稳定性： 多进程、多机器、多机房，分布式设计。 容灾备份
+异构共存： 协议</description>
+    </item>
+    
+    <item>
+      <title>Node.js 的 child_process, cluster, worker_threads 模块</title>
+      <link>https://yrjkqq.github.io/posts/posts/00-understanding-nodejs-deeply-part3/</link>
+      <pubDate>Mon, 14 Jan 2019 16:41:00 +0800</pubDate>
+      
+      <guid>https://yrjkqq.github.io/posts/posts/00-understanding-nodejs-deeply-part3/</guid>
+      <description>Node 并非真正的单线程架构，有一些 I/O 线程由底层 libuv 处理。JavaScript 代码永远运行在 V8 上，是单线程的。
+多线程中，每个线程都拥有自己独立的堆栈，这个堆栈需要占用一定的内存空间。由于一个 CPU 核心在一个时刻只能做一件事情，操作系统只能通过将 CPU 切分为时间片的方法，让线程可以较为均匀地使用 CPU 资源。但是操作系统在切换线程的同时也要切换线程的上下文，当线程数量过多时，事件会被消耗到上下文切换中。Node 基于事件驱动，采用单线程避免了不必要的内存开销和上下文切换开销。
+Node 中所有处理都在单线程上进行，影响事件驱动服务模型性能的点在于 CPU 的计算能力，但它不受多进程或多线程中资源上限的影响，可伸缩性远比前两者更高。也就是说，CPU 计算能力可以通过增加 CPU 核心的数量来进行提高，进一步提高 Node 的性能。那么 Node 中如何利用多核 CPU 呢？
+如何提高 CPU 的利用率？ 解决单线程单进程堆多核使用不足的问题：理想状态下每个进程各自利用一个 CPU, 以此实现多核 CPU 的利用。Node 提供了 child_process 模块。
+Master-Worker 主从模式：分布式架构中用于并行处理业务的模式。主进程不负责具体的业务处理，而是负责调度和管理工作进程，趋于稳定。工作进程负责具体的业务处理，需要关注其稳定性。示例代码如下：
+// master.js import childProcess from &amp;#34;child_process&amp;#34;; import os from &amp;#34;os&amp;#34;; import { dirname } from &amp;#34;path&amp;#34;; import { fileURLToPath } from &amp;#34;url&amp;#34;; const __filename = fileURLToPath(import.meta.url); const __dirname = dirname(__filename); // 获取操作系统的 cpu 的核心数 const cpus = os.</description>
     </item>
     
     <item>

@@ -3,11 +3,6 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
-    <loc>https://yrjkqq.github.io/posts/posts/08-child_processclusterworker_threads/</loc>
-    <lastmod>2020-11-05T15:30:00+08:00</lastmod>
-  </url>
-  
-  <url>
     <loc>https://yrjkqq.github.io/posts/tags/node/</loc>
     <lastmod>2020-11-05T15:30:00+08:00</lastmod>
   </url>
@@ -40,6 +35,16 @@
   <url>
     <loc>https://yrjkqq.github.io/posts/posts/05-nextjs-srouce-code/</loc>
     <lastmod>2020-05-12T09:45:00+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://yrjkqq.github.io/posts/posts/00-understanding-nodejs-deeply-part4/</loc>
+    <lastmod>2019-01-18T21:41:00+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://yrjkqq.github.io/posts/posts/00-understanding-nodejs-deeply-part3/</loc>
+    <lastmod>2019-01-14T16:41:00+08:00</lastmod>
   </url>
   
   <url>

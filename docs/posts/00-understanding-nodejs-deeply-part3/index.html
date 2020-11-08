@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html><head>
+	<meta charset="utf-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge"><title>Node.js 的 child_process, cluster, worker_threads 模块 - That&#39;s the Way It Is</title><link rel="icon" type="image/png" href=/posts/img/favicon.ico /><meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<meta property="og:description" content="Node.js 中的 child_process, cluster, worker_threads 模块的异同和各自适用场景" />
+	<meta name="twitter:description" content="Node.js 中的 child_process, cluster, worker_threads 模块的异同和各自适用场景" />
+	<meta name="description" content="Node.js 中的 child_process, cluster, worker_threads 模块的异同和各自适用场景" />
+	<meta name="description" content="Node.js 中的 child_process, cluster, worker_threads 模块的异同和各自适用场景" />
+
+	<meta property="og:title" content="Node.js 的 child_process, cluster, worker_threads 模块 | That&#39;s the Way It Is" />
+	<meta name="twitter:title" content="Node.js 的 child_process, cluster, worker_threads 模块 | That&#39;s the Way It Is" />
+
+	<meta property="og:image" content=""/>
+	<meta itemprop="name" content="Node.js 的 child_process, cluster, worker_threads 模块 | That&#39;s the Way It Is" />
+	<meta name="application-name" content="Node.js 的 child_process, cluster, worker_threads 模块 | That&#39;s the Way It Is" />
+	<meta property="og:site_name" content="" />
+	<meta property="og:title" content="Node.js 的 child_process, cluster, worker_threads 模块" />
+<meta property="og:description" content="Node.js 中的 child_process, cluster, worker_threads 模块的异同和各自适用场景" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://yrjkqq.github.io/posts/posts/00-understanding-nodejs-deeply-part3/" />
+<meta property="article:published_time" content="2019-01-14T16:41:00+08:00" />
+<meta property="article:modified_time" content="2019-01-14T16:41:00+08:00" />
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Node.js 的 child_process, cluster, worker_threads 模块"/>
+<meta name="twitter:description" content="Node.js 中的 child_process, cluster, worker_threads 模块的异同和各自适用场景"/>
+
+	<link href="https://yrjkqq.github.io/posts/css/fonts.css" rel="stylesheet">
+	
+	<link rel="stylesheet" type="text/css" media="screen" href="https://yrjkqq.github.io/posts/css/main.css" /><link rel="stylesheet" type="text/css" href="https://yrjkqq.github.io/posts/css/dark.css" media="(prefers-color-scheme: dark)" />
+	
+	
+</head>
+<body>
+        <div class="content"><header>
+	<div class="main">
+		<a href="https://yrjkqq.github.io/posts/">That&#39;s the Way It Is</a>
+	</div>
+	<nav>
+		
+		<a href="/posts/tags">Tags</a>
+		
+	</nav>
+</header>
+
+<main>
+	<article>
+		<div class="title">
+			<h1 class="title">Node.js 的 child_process, cluster, worker_threads 模块</h1>
+			<div class="meta">Posted on Jan 14, 2019</div>
+		</div>
+		
+
+		<section class="body">
+			<p>Node 并非真正的单线程架构，有一些 I/O 线程由底层 libuv 处理。JavaScript 代码永远运行在 V8 上，是单线程的。</p>
+<p>多线程中，每个线程都拥有自己独立的堆栈，这个堆栈需要占用一定的内存空间。由于一个 CPU 核心在一个时刻只能做一件事情，操作系统只能通过将 CPU 切分为时间片的方法，让线程可以较为均匀地使用 CPU 资源。但是操作系统在切换线程的同时也要切换线程的上下文，当线程数量过多时，事件会被消耗到上下文切换中。<em>Node 基于事件驱动，采用单线程避免了不必要的内存开销和上下文切换开销。</em></p>
+<p>Node 中所有处理都在单线程上进行，影响事件驱动服务模型性能的点在于 CPU 的计算能力，但它不受多进程或多线程中资源上限的影响，可伸缩性远比前两者更高。也就是说，CPU 计算能力可以通过增加 CPU 核心的数量来进行提高，进一步提高 Node 的性能。那么 Node 中如何利用多核 CPU 呢？</p>
+<h2 id="如何提高-cpu-的利用率">如何提高 CPU 的利用率？</h2>
+<p>解决单线程单进程堆多核使用不足的问题：理想状态下每个进程各自利用一个 CPU, 以此实现多核 CPU 的利用。Node 提供了 <code>child_process</code> 模块。</p>
+<p><strong>Master-Worker 主从模式</strong>：分布式架构中用于并行处理业务的模式。主进程不负责具体的业务处理，而是负责调度和管理工作进程，趋于稳定。工作进程负责具体的业务处理，需要关注其稳定性。示例代码如下：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-js" data-lang="js"><span style="color:#75715e">// master.js
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">import</span> <span style="color:#a6e22e">childProcess</span> <span style="color:#a6e22e">from</span> <span style="color:#e6db74">&#34;child_process&#34;</span>;
+<span style="color:#66d9ef">import</span> <span style="color:#a6e22e">os</span> <span style="color:#a6e22e">from</span> <span style="color:#e6db74">&#34;os&#34;</span>;
+<span style="color:#66d9ef">import</span> { <span style="color:#a6e22e">dirname</span> } <span style="color:#a6e22e">from</span> <span style="color:#e6db74">&#34;path&#34;</span>;
+<span style="color:#66d9ef">import</span> { <span style="color:#a6e22e">fileURLToPath</span> } <span style="color:#a6e22e">from</span> <span style="color:#e6db74">&#34;url&#34;</span>;
+
+<span style="color:#66d9ef">const</span> <span style="color:#a6e22e">__filename</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">fileURLToPath</span>(<span style="color:#66d9ef">import</span>.<span style="color:#a6e22e">meta</span>.<span style="color:#a6e22e">url</span>);
+<span style="color:#66d9ef">const</span> <span style="color:#a6e22e">__dirname</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">dirname</span>(<span style="color:#a6e22e">__filename</span>);
+
+<span style="color:#75715e">// 获取操作系统的 cpu 的核心数
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">cpus</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">os</span>.<span style="color:#a6e22e">cpus</span>();
+<span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#a6e22e">cpus</span>.<span style="color:#a6e22e">length</span>); <span style="color:#75715e">// 16
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">let</span> <span style="color:#a6e22e">i</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; <span style="color:#a6e22e">i</span> <span style="color:#f92672">&lt;</span> <span style="color:#a6e22e">cpus</span>.<span style="color:#a6e22e">length</span>; <span style="color:#a6e22e">i</span><span style="color:#f92672">++</span>) {
+  <span style="color:#75715e">// 复制进程使每个 CPU 核心都利用上：fork() 复制的进程都是一个独立的进程，这个进程中有着独立而全新的 V8 实例。
+</span><span style="color:#75715e"></span>  <span style="color:#a6e22e">childProcess</span>.<span style="color:#a6e22e">fork</span>(<span style="color:#a6e22e">__dirname</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;/worker.js&#34;</span>);
+}
+
+<span style="color:#75715e">// worker.js
+</span><span style="color:#75715e"></span><span style="color:#960050;background-color:#1e0010">#</span><span style="color:#f92672">!</span><span style="color:#960050;background-color:#1e0010">/usr/bin/env node</span>
+<span style="color:#66d9ef">import</span> <span style="color:#a6e22e">http</span> <span style="color:#a6e22e">from</span> <span style="color:#e6db74">&#34;http&#34;</span>;
+<span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">&#34;run worker.js&#34;</span>);
+<span style="color:#a6e22e">http</span>
+  .<span style="color:#a6e22e">createServer</span>(<span style="color:#66d9ef">function</span> (<span style="color:#a6e22e">req</span>, <span style="color:#a6e22e">res</span>) {
+    <span style="color:#a6e22e">res</span>.<span style="color:#a6e22e">writeHead</span>(<span style="color:#ae81ff">200</span>, { <span style="color:#e6db74">&#34;Content-Type&#34;</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;text/plain&#34;</span> });
+    <span style="color:#a6e22e">res</span>.<span style="color:#a6e22e">end</span>(<span style="color:#e6db74">&#34;Hello World!\n\r&#34;</span>);
+  })
+  .<span style="color:#a6e22e">listen</span>(Math.<span style="color:#a6e22e">round</span>((<span style="color:#ae81ff">1</span> <span style="color:#f92672">+</span> Math.<span style="color:#a6e22e">random</span>()) <span style="color:#f92672">*</span> <span style="color:#ae81ff">30000</span>), <span style="color:#e6db74">&#34;127.0.0.1&#34;</span>);
+
+<span style="color:#75715e">// process.exit(0);
+</span></code></pre></div><h3 id="创建子进程">创建子进程</h3>
+<p>child_process 模块提供以下四个方法：使用方式查看 <a href="https://nodejs.org/dist/latest-v14.x/docs/api/child_process.html#child_process_child_process_spawn_command_args_options">文档</a></p>
+<ul>
+<li>spawn()：返回的子进程对象具有 stdio 属性，可以用来获取子进程的输出。而 fork() 方法没有这个属性，无法以同样的方式获取子进程的输出。</li>
+<li>exec()</li>
+<li>execFile()</li>
+<li><a href="https://nodejs.org/dist/latest-v14.x/docs/api/child_process.html#child_process_child_process_fork_modulepath_args_options">fork()</a>: fork() 是 spawn() 的特例，用来创建 Node.js 进程。创建完返回的子进程会带有额外的内嵌的通信管道，用来在父子进程之间通信，具有 <a href="https://nodejs.org/dist/latest-v14.x/docs/api/child_process.html#child_process_subprocess_send_message_sendhandle_options_callback">send()</a> 方法。其余的 api 像是 spawn()，则不具有这个功能，返回的子进程对象没有 send() 方法，这些 api 可以用来创建非 Node.js 进程。</li>
+</ul>
+<h3 id="进程间通信">进程间通信</h3>
+<p>HTML5 提供了 WebWorkerAPI, WebWorker 运行创建工作线程并在后台运行，使得一些阻塞严重的计算不影响主线程上的 UI 渲染。线程之间通过 onmessage() 和 postMessage() 进行通信。类似地，在 Node 中使用 child_process 创建了子进程后会返回子进程对象，由 send() 方法实现主线程和子线程发送数据，message 事件实现收听子线程进程发来的数据。示例代码如下：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-js" data-lang="js"><span style="color:#75715e">// parent.js
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">import</span> <span style="color:#a6e22e">cp</span> <span style="color:#a6e22e">from</span> <span style="color:#e6db74">&#34;child_process&#34;</span>;
+<span style="color:#66d9ef">import</span> { <span style="color:#a6e22e">getDirname</span> } <span style="color:#a6e22e">from</span> <span style="color:#e6db74">&#34;./util.js&#34;</span>;
+
+<span style="color:#66d9ef">const</span> <span style="color:#a6e22e">__dirname</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">getDirname</span>(<span style="color:#66d9ef">import</span>.<span style="color:#a6e22e">meta</span>.<span style="color:#a6e22e">url</span>);
+<span style="color:#66d9ef">const</span> <span style="color:#a6e22e">n</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">cp</span>.<span style="color:#a6e22e">fork</span>(<span style="color:#e6db74">`</span><span style="color:#e6db74">${</span><span style="color:#a6e22e">__dirname</span><span style="color:#e6db74">}</span><span style="color:#e6db74">/sub.js`</span>);
+
+<span style="color:#a6e22e">n</span>.<span style="color:#a6e22e">on</span>(<span style="color:#e6db74">&#34;message&#34;</span>, <span style="color:#66d9ef">function</span> (<span style="color:#a6e22e">m</span>) {
+  <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">&#34;PARENT got message: &#34;</span>, <span style="color:#a6e22e">m</span>);
+});
+<span style="color:#a6e22e">n</span>.<span style="color:#a6e22e">send</span>({ <span style="color:#a6e22e">hello</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;world&#34;</span> });
+
+
+<span style="color:#75715e">// sub.js
+</span><span style="color:#75715e"></span><span style="color:#a6e22e">process</span>.<span style="color:#a6e22e">on</span>(<span style="color:#e6db74">&#34;message&#34;</span>, <span style="color:#66d9ef">function</span> (<span style="color:#a6e22e">m</span>) {
+  <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">&#34;CHILD got message: &#34;</span>, <span style="color:#a6e22e">m</span>);
+});
+
+<span style="color:#a6e22e">process</span>.<span style="color:#a6e22e">send</span>({ <span style="color:#a6e22e">foo</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;bar&#34;</span> });
+
+<span style="color:#75715e">// util.js
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">import</span> { <span style="color:#a6e22e">dirname</span> } <span style="color:#a6e22e">from</span> <span style="color:#e6db74">&#34;path&#34;</span>;
+<span style="color:#66d9ef">import</span> { <span style="color:#a6e22e">fileURLToPath</span> } <span style="color:#a6e22e">from</span> <span style="color:#e6db74">&#34;url&#34;</span>;
+
+<span style="color:#66d9ef">export</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">getDirname</span>(<span style="color:#a6e22e">url</span>) {
+  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">__filename</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">fileURLToPath</span>(<span style="color:#a6e22e">url</span>);
+  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">__dirname</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">dirname</span>(<span style="color:#a6e22e">__filename</span>);
+  <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">__dirname</span>;
+}
+</code></pre></div><h4 id="进程间通信原理">进程间通信原理</h4>
+<p>为了实现父子进程间的通信，父进程和子进程之间会创建 <strong>IPC 通道（Inter-Process Communication, 进程间通信）</strong>。Node 使用管道（pipe）实现 IPC 通道，管道具体实现由 libuv 提供，而在应用层只有 message 事件和 send() 方法。</p>
+<p><strong>父进程在创建子进程之前，会创建 IPC 通道并监听它，然后才真正创建出子进程，并通过环境变量（NODE_CHANNEL_FD）告诉子进程这个 IPC 通道的文件描述符。子进程在启动的过程中，根据文件描述符去连接这个已存在的 IPC 通道，从而完成父子进程之间的连接。</strong></p>
+<p>只有启动的子进程是 Node 进程时，子进程才根据环境变量去连接 IPC 通道。</p>
+<h3 id="传递句柄">传递句柄</h3>
+<p>多进程的 web 服务器架构中，通常是让每个进程监听不同的端口，其中主进程监听主端口（如 80），主进程对外接受所有的网络请求，再将这些请求分别代理到不同的端口的进程上。由于进程每接收到一个连接，将会用掉一个文件描述符，因此代理方案中客户端连接到代理进程，代理进程连接到工作进程的过程中需要用掉两个文件描述符。而操作系统的文件描述符是有限的，代理方案浪费掉一倍数量的文件描述符的做法影响了系统的扩展能力。</p>
+<p>为了解决代理方案的问题，Node 引入了进程间发送句柄的功能。send() 方法的第二个参数就是可选句柄。句柄是一种可以用来标识资源的引用，它的内部包含了指向对象的文件描述符。</p>
+<p>有了句柄后，代理方案中的主进程接收到 socket 请求后，将这个 socket 直接发送给工作进程，而不是重新与工作进程建立新的 socket 连接来转发数据。示例代码如下：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-js" data-lang="js"><span style="color:#75715e">// main.js
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">cp</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">require</span>(<span style="color:#e6db74">&#34;child_process&#34;</span>);
+<span style="color:#66d9ef">const</span> <span style="color:#a6e22e">net</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">require</span>(<span style="color:#e6db74">&#34;net&#34;</span>);
+<span style="color:#75715e">// import cp from &#34;child_process&#34;;
+</span><span style="color:#75715e">// import net from &#34;net&#34;;
+</span><span style="color:#75715e"></span>
+<span style="color:#66d9ef">const</span> <span style="color:#a6e22e">subprocess</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">cp</span>.<span style="color:#a6e22e">fork</span>(<span style="color:#e6db74">&#34;./handle-sub.js&#34;</span>);
+
+<span style="color:#66d9ef">const</span> <span style="color:#a6e22e">server</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">net</span>.<span style="color:#a6e22e">createServer</span>();
+<span style="color:#a6e22e">server</span>.<span style="color:#a6e22e">on</span>(<span style="color:#e6db74">&#34;connection&#34;</span>, <span style="color:#66d9ef">function</span> (<span style="color:#a6e22e">socket</span>) {
+  <span style="color:#a6e22e">socket</span>.<span style="color:#a6e22e">end</span>(<span style="color:#e6db74">&#34;handled by parent\n&#34;</span>);
+});
+<span style="color:#a6e22e">server</span>.<span style="color:#a6e22e">listen</span>(<span style="color:#ae81ff">1337</span>, <span style="color:#66d9ef">function</span> () {
+  <span style="color:#a6e22e">subprocess</span>.<span style="color:#a6e22e">send</span>(<span style="color:#e6db74">&#34;server&#34;</span>, <span style="color:#a6e22e">server</span>, (<span style="color:#a6e22e">result</span>) =&gt; {
+    <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">`parent send result: </span><span style="color:#e6db74">${</span><span style="color:#a6e22e">result</span><span style="color:#e6db74">}</span><span style="color:#e6db74">`</span>);
+  });
+});
+
+<span style="color:#a6e22e">subprocess</span>.<span style="color:#a6e22e">on</span>(<span style="color:#e6db74">&#34;message&#34;</span>, <span style="color:#66d9ef">function</span> (<span style="color:#a6e22e">m</span>) {
+  <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#a6e22e">m</span>);
+});
+
+
+<span style="color:#75715e">// sub.js
+</span><span style="color:#75715e"></span><span style="color:#960050;background-color:#1e0010">#</span><span style="color:#f92672">!</span><span style="color:#960050;background-color:#1e0010">/usr/bin/env node</span>
+<span style="color:#a6e22e">process</span>.<span style="color:#a6e22e">on</span>(<span style="color:#e6db74">&#34;message&#34;</span>, (<span style="color:#a6e22e">m</span>, <span style="color:#a6e22e">server</span>) =&gt; {
+  <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">m</span> <span style="color:#f92672">===</span> <span style="color:#e6db74">&#34;server&#34;</span>) {
+    <span style="color:#a6e22e">server</span>.<span style="color:#a6e22e">on</span>(<span style="color:#e6db74">&#34;connection&#34;</span>, (<span style="color:#a6e22e">socket</span>) =&gt; {
+      <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">&#34;subprocess got socket&#34;</span>);
+      <span style="color:#a6e22e">socket</span>.<span style="color:#a6e22e">end</span>(<span style="color:#e6db74">&#34;handled by child\n&#34;</span>);
+    });
+  }
+});
+</code></pre></div><p><strong>注意</strong>：如果使用 es6 的模块方案，上面的示例代码在使用 <code>curl localhost:1337</code> 如果请求到子进程，会卡住，curl 接收不到响应，子进程 socket connection 事件的监听器也打印不出日志。原因为止，改成 commonjs 的模块方式，一切正常。</p>
+<p>主进程中的服务器在发送句柄后可以关闭服务，子进程可以在 http 层面来处理请求，示例代码如下：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-js" data-lang="js"><span style="color:#75715e">// parent.js
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">cp</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">require</span>(<span style="color:#e6db74">&#34;child_process&#34;</span>);
+
+<span style="color:#66d9ef">const</span> <span style="color:#a6e22e">child1</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">cp</span>.<span style="color:#a6e22e">fork</span>(<span style="color:#e6db74">&#34;http-child.js&#34;</span>);
+<span style="color:#66d9ef">const</span> <span style="color:#a6e22e">child2</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">cp</span>.<span style="color:#a6e22e">fork</span>(<span style="color:#e6db74">&#34;http-child.js&#34;</span>);
+
+<span style="color:#66d9ef">const</span> <span style="color:#a6e22e">server</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">require</span>(<span style="color:#e6db74">&#34;net&#34;</span>).<span style="color:#a6e22e">createServer</span>();
+<span style="color:#a6e22e">server</span>.<span style="color:#a6e22e">listen</span>(<span style="color:#ae81ff">1337</span>, <span style="color:#66d9ef">function</span> () {
+  <span style="color:#a6e22e">child1</span>.<span style="color:#a6e22e">send</span>(<span style="color:#e6db74">&#34;server&#34;</span>, <span style="color:#a6e22e">server</span>);
+  <span style="color:#a6e22e">child2</span>.<span style="color:#a6e22e">send</span>(<span style="color:#e6db74">&#34;server&#34;</span>, <span style="color:#a6e22e">server</span>);
+
+  <span style="color:#75715e">// 关掉
+</span><span style="color:#75715e"></span>  <span style="color:#a6e22e">server</span>.<span style="color:#a6e22e">close</span>();
+});
+
+<span style="color:#75715e">// child.js
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">http</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">require</span>(<span style="color:#e6db74">&#34;http&#34;</span>);
+
+<span style="color:#66d9ef">const</span> <span style="color:#a6e22e">server</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">http</span>.<span style="color:#a6e22e">createServer</span>(<span style="color:#66d9ef">function</span> (<span style="color:#a6e22e">req</span>, <span style="color:#a6e22e">res</span>) {
+  <span style="color:#a6e22e">res</span>.<span style="color:#a6e22e">writeHead</span>(<span style="color:#ae81ff">200</span>, { <span style="color:#e6db74">&#34;Content-Type&#34;</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;text/plain&#34;</span> });
+  <span style="color:#a6e22e">res</span>.<span style="color:#a6e22e">end</span>(<span style="color:#e6db74">&#34;handled by child, pid is &#34;</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">process</span>.<span style="color:#a6e22e">pid</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;\n&#34;</span>);
+});
+
+<span style="color:#a6e22e">process</span>.<span style="color:#a6e22e">on</span>(<span style="color:#e6db74">&#34;message&#34;</span>, <span style="color:#66d9ef">function</span> (<span style="color:#a6e22e">m</span>, <span style="color:#a6e22e">tcp</span>) {
+  <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">m</span> <span style="color:#f92672">===</span> <span style="color:#e6db74">&#34;server&#34;</span>) {
+    <span style="color:#a6e22e">tcp</span>.<span style="color:#a6e22e">on</span>(<span style="color:#e6db74">&#34;connection&#34;</span>, <span style="color:#66d9ef">function</span> (<span style="color:#a6e22e">socket</span>) {
+      <span style="color:#a6e22e">server</span>.<span style="color:#a6e22e">emit</span>(<span style="color:#e6db74">&#34;connection&#34;</span>, <span style="color:#a6e22e">socket</span>);
+    });
+  }
+});
+</code></pre></div><hr>
+<p>由于 Node 执行在单线程上，一旦单线程上抛出的异常没有被捕获，将会引起整个进程崩溃。那么保证 Node 进程的健壮性和稳定性呢？使用 child_process 模块利用多核 cpu 创建多个进程后，每个工作进程仍然是单进程执行的，其稳定性如何保证？</p>
+<h2 id="提高进程的健壮性">提高进程的健壮性？</h2>
+<h3 id="进程事件">进程事件</h3>
+<p>除了 message 事件外，还有如下事件：</p>
+<ul>
+<li><a href="https://nodejs.org/dist/latest-v14.x/docs/api/child_process.html#child_process_event_error">error</a> 当子进程无法被复制创建、无法被杀死、无法发送消息时会触发该事件</li>
+<li><a href="https://nodejs.org/dist/latest-v14.x/docs/api/child_process.html#child_process_event_exit">exit</a> 子进程退出时触发该事件，子进程如果是正常退出，这个事件的第一个参数为退出码，否则为 null. 如果进程是通过 kill() 方法被杀死的，会得到第二个参数，它表示杀死进程的信号</li>
+<li><a href="https://nodejs.org/dist/latest-v14.x/docs/api/child_process.html#child_process_event_close">close</a> 在子进程的标准输入输出流中止时触发该事件，参数与 exit 相同</li>
+<li><a href="https://nodejs.org/dist/latest-v14.x/docs/api/child_process.html#child_process_event_disconnect">disconnect</a> 在父进程或子进程中调用 disconnect() 方法时触发该事件，在调用该方法时将关闭监听 IPC 通道</li>
+</ul>
+<p><a href="https://nodejs.org/dist/latest-v14.x/docs/api/child_process.html#child_process_subprocess_send_message_sendhandle_options_callback">send()</a> 方法还可以接受第三个参数作为回调函数，该函数在 message 发送后但是可能在子进程接收到消息之前被调用。调用时传入一个参数，null 表示发送成功，Error 对象表示失败。</p>
+<p><a href="https://nodejs.org/dist/latest-v14.x/docs/api/child_process.html#child_process_subprocess_kill_signal">kill()</a> 方法能给子进程发送消息。该方法并不能真正地将通过 IPC 通道相连的子进程杀死，它只是给子进程发送了一个系统信号。默认发送 SIGTERM 信号。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-js" data-lang="js"><span style="color:#75715e">// 子进程
+</span><span style="color:#75715e"></span><span style="color:#a6e22e">child</span>.<span style="color:#a6e22e">kill</span>([<span style="color:#a6e22e">signal</span>])
+
+<span style="color:#75715e">// 当前进程
+</span><span style="color:#75715e"></span><span style="color:#a6e22e">process</span>.<span style="color:#a6e22e">kill</span>(<span style="color:#a6e22e">pid</span>, [<span style="color:#a6e22e">signal</span>])
+</code></pre></div><h3 id="自动重启">自动重启</h3>
+<p>通过进程事件，可以创造出管理进程的机制。比如在监听到子进程的 exit 事件后，主进程再重新一个工作进程来继续服务。示例代码如下：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-js" data-lang="js"><span style="color:#75715e">// reboot-master.js
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">net</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">require</span>(<span style="color:#e6db74">&#34;net&#34;</span>);
+<span style="color:#66d9ef">const</span> <span style="color:#a6e22e">cp</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">require</span>(<span style="color:#e6db74">&#34;child_process&#34;</span>);
+<span style="color:#66d9ef">const</span> <span style="color:#a6e22e">os</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">require</span>(<span style="color:#e6db74">&#34;os&#34;</span>);
+
+<span style="color:#66d9ef">const</span> <span style="color:#a6e22e">server</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">net</span>.<span style="color:#a6e22e">createServer</span>();
+<span style="color:#a6e22e">server</span>.<span style="color:#a6e22e">listen</span>(<span style="color:#ae81ff">1337</span>);
+
+<span style="color:#66d9ef">const</span> <span style="color:#a6e22e">workers</span> <span style="color:#f92672">=</span> {};
+<span style="color:#66d9ef">const</span> <span style="color:#a6e22e">createWorker</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">function</span> () {
+  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">worker</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">cp</span>.<span style="color:#a6e22e">fork</span>(<span style="color:#a6e22e">__dirname</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;/reboot-worker.js&#34;</span>);
+  <span style="color:#75715e">// 退出时重新启动新的进程
+</span><span style="color:#75715e"></span>  <span style="color:#a6e22e">worker</span>.<span style="color:#a6e22e">on</span>(<span style="color:#e6db74">&#34;exit&#34;</span>, <span style="color:#66d9ef">function</span> () {
+    <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">&#34;Worker &#34;</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">worker</span>.<span style="color:#a6e22e">pid</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34; exited.&#34;</span>);
+    <span style="color:#66d9ef">delete</span> <span style="color:#a6e22e">workers</span>[<span style="color:#a6e22e">worker</span>.<span style="color:#a6e22e">pid</span>];
+    <span style="color:#a6e22e">createWorker</span>();
+  });
+  <span style="color:#75715e">// 句柄转发
+</span><span style="color:#75715e"></span>  <span style="color:#a6e22e">worker</span>.<span style="color:#a6e22e">send</span>(<span style="color:#e6db74">&#34;server&#34;</span>, <span style="color:#a6e22e">server</span>);
+  <span style="color:#a6e22e">workers</span>[<span style="color:#a6e22e">worker</span>.<span style="color:#a6e22e">pid</span>] <span style="color:#f92672">=</span> <span style="color:#a6e22e">worker</span>;
+  <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">&#34;Create worker, pid: &#34;</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">worker</span>.<span style="color:#a6e22e">pid</span>);
+};
+
+<span style="color:#66d9ef">const</span> <span style="color:#a6e22e">cpus</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">os</span>.<span style="color:#a6e22e">cpus</span>();
+<span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">let</span> <span style="color:#a6e22e">i</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; <span style="color:#a6e22e">i</span> <span style="color:#f92672">&lt;</span> <span style="color:#a6e22e">cpus</span>.<span style="color:#a6e22e">length</span>; <span style="color:#a6e22e">i</span><span style="color:#f92672">++</span>) {
+  <span style="color:#a6e22e">createWorker</span>();
+}
+
+<span style="color:#75715e">// 主进程退出时，退出所有工作进程
+</span><span style="color:#75715e"></span><span style="color:#a6e22e">process</span>.<span style="color:#a6e22e">on</span>(<span style="color:#e6db74">&#34;exit&#34;</span>, <span style="color:#66d9ef">function</span> () {
+  <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">const</span> <span style="color:#a6e22e">pid</span> <span style="color:#66d9ef">in</span> <span style="color:#a6e22e">workers</span>) {
+    <span style="color:#a6e22e">workers</span>[<span style="color:#a6e22e">pid</span>].<span style="color:#a6e22e">kill</span>();
+  }
+});
+
+<span style="color:#75715e">// reboot-worker.js
+</span><span style="color:#75715e"></span><span style="color:#a6e22e">process</span>.<span style="color:#a6e22e">on</span>(<span style="color:#e6db74">&#34;message&#34;</span>, <span style="color:#66d9ef">function</span> (<span style="color:#a6e22e">m</span>, <span style="color:#a6e22e">server</span>) {
+  <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">m</span> <span style="color:#f92672">===</span> <span style="color:#e6db74">&#34;server&#34;</span>) {
+    <span style="color:#a6e22e">server</span>.<span style="color:#a6e22e">on</span>(<span style="color:#e6db74">&#34;connection&#34;</span>, <span style="color:#66d9ef">function</span> (<span style="color:#a6e22e">socket</span>) {
+      <span style="color:#a6e22e">socket</span>.<span style="color:#a6e22e">end</span>(<span style="color:#e6db74">`handled by reboot-worker. pid: </span><span style="color:#e6db74">${</span><span style="color:#a6e22e">process</span>.<span style="color:#a6e22e">pid</span><span style="color:#e6db74">}</span><span style="color:#960050;background-color:#1e0010">\</span><span style="color:#e6db74">n`</span>);
+    });
+  }
+});
+</code></pre></div><p>如果使用 <code>kill 子进程pid</code> 杀死一个子进程，那么会自动重新再创建一个子进程。如果直接使用 kill 命令杀死主进程（无论是 <code>kill -2 主进程pid</code> 模拟 ctrl+c 发送 SIGINT 信号，还是使用 <code>kill -9 主进程pid</code> 发送 SIGKILL 信号），那么子进程不会被杀死，需要用 <code>ps aux | grep reboot</code> 搜索出所有子进程后，使用 kill 命令一一杀死。但是直接在执行 <code>node reboot-master.js</code> 的命令行使用 ctrl+c 却可以停止所有子进程。主进程中接收到 SIGINT 信号主动退出，修改为以下代码：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-js" data-lang="js"><span style="color:#75715e">// 主进程退出时，退出所有工作进程
+</span><span style="color:#75715e"></span><span style="color:#a6e22e">process</span>.<span style="color:#a6e22e">on</span>(<span style="color:#e6db74">&#34;exit&#34;</span>, <span style="color:#66d9ef">function</span> (<span style="color:#a6e22e">code</span>, <span style="color:#a6e22e">signal</span>) {
+  <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">&#34;exit&#34;</span>, <span style="color:#a6e22e">code</span>, <span style="color:#a6e22e">signal</span>);
+  <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">const</span> <span style="color:#a6e22e">pid</span> <span style="color:#66d9ef">in</span> <span style="color:#a6e22e">workers</span>) {
+    <span style="color:#a6e22e">workers</span>[<span style="color:#a6e22e">pid</span>].<span style="color:#a6e22e">kill</span>();
+  }
+});
+
+<span style="color:#75715e">// 接收到 SIGINT 信号后(CTRL+C 或 kill -2 pid)，主进程退出，会触发 exit 事件，exit 事件中退出所有子进程
+</span><span style="color:#75715e"></span><span style="color:#a6e22e">process</span>.<span style="color:#a6e22e">on</span>(<span style="color:#e6db74">&#34;SIGINT&#34;</span>, <span style="color:#66d9ef">function</span> (<span style="color:#a6e22e">code</span>, <span style="color:#a6e22e">signal</span>) {
+  <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">&#34;SIGINT&#34;</span>, <span style="color:#a6e22e">code</span>, <span style="color:#a6e22e">signal</span>);
+  <span style="color:#a6e22e">process</span>.<span style="color:#a6e22e">exit</span>(<span style="color:#ae81ff">0</span>);
+});
+
+<span style="color:#75715e">// $ kill -2 pid
+</span><span style="color:#75715e">// SIGINT SIGINT 2
+</span><span style="color:#75715e">// exit 0 undefined
+</span></code></pre></div><p>子进程中可能由于 BUG 抛出未捕获的错误，导致工作进程退出，此时也需要重新启动一个工作进程，保证整个集群中总是有工作进程为用户服务，示例代码如下：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-js" data-lang="js"><span style="color:#75715e">// reboot-worker.js
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">url</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">require</span>(<span style="color:#e6db74">&#34;url&#34;</span>);
+<span style="color:#66d9ef">const</span> <span style="color:#a6e22e">http</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">require</span>(<span style="color:#e6db74">&#34;http&#34;</span>);
+
+<span style="color:#66d9ef">const</span> <span style="color:#a6e22e">server</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">http</span>.<span style="color:#a6e22e">createServer</span>(<span style="color:#66d9ef">function</span> (<span style="color:#a6e22e">req</span>, <span style="color:#a6e22e">res</span>) {
+  <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">url</span>.<span style="color:#a6e22e">parse</span>(<span style="color:#a6e22e">req</span>.<span style="color:#a6e22e">url</span>).<span style="color:#a6e22e">pathname</span> <span style="color:#f92672">===</span> <span style="color:#e6db74">&#34;/error&#34;</span>) {
+    <span style="color:#75715e">// 务必返回响应，否则连接会保持打开，无法断开，当前进程不会退出，新来的连接也会得不到响应
+</span><span style="color:#75715e"></span>    <span style="color:#a6e22e">res</span>.<span style="color:#a6e22e">writeHead</span>(<span style="color:#ae81ff">400</span>);
+    <span style="color:#a6e22e">res</span>.<span style="color:#a6e22e">end</span>(<span style="color:#e6db74">&#34;unknown url\n&#34;</span>);
+    <span style="color:#66d9ef">throw</span> <span style="color:#66d9ef">new</span> Error(<span style="color:#e6db74">&#34;unknown url&#34;</span>);
+  }
+  <span style="color:#a6e22e">res</span>.<span style="color:#a6e22e">writeHead</span>(<span style="color:#ae81ff">200</span>, { <span style="color:#e6db74">&#34;Content-Type&#34;</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;text/plain&#34;</span> });
+  <span style="color:#a6e22e">res</span>.<span style="color:#a6e22e">end</span>(<span style="color:#e6db74">&#34;handled by chil, pid is &#34;</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">process</span>.<span style="color:#a6e22e">pid</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;\n&#34;</span>);
+});
+
+<span style="color:#66d9ef">let</span> <span style="color:#a6e22e">worker</span>;
+
+<span style="color:#a6e22e">process</span>.<span style="color:#a6e22e">on</span>(<span style="color:#e6db74">&#34;message&#34;</span>, <span style="color:#66d9ef">function</span> (<span style="color:#a6e22e">m</span>, <span style="color:#a6e22e">tcp</span>) {
+  <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">m</span> <span style="color:#f92672">===</span> <span style="color:#e6db74">&#34;server&#34;</span>) {
+    <span style="color:#a6e22e">worker</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">tcp</span>;
+    <span style="color:#a6e22e">worker</span>.<span style="color:#a6e22e">on</span>(<span style="color:#e6db74">&#34;connection&#34;</span>, <span style="color:#66d9ef">function</span> (<span style="color:#a6e22e">socket</span>) {
+      <span style="color:#a6e22e">server</span>.<span style="color:#a6e22e">emit</span>(<span style="color:#e6db74">&#34;connection&#34;</span>, <span style="color:#a6e22e">socket</span>);
+    });
+  }
+});
+
+<span style="color:#75715e">// https://nodejs.org/dist/latest-v14.x/docs/api/process.html#process_event_uncaughtexception
+</span><span style="color:#75715e"></span><span style="color:#a6e22e">process</span>.<span style="color:#a6e22e">on</span>(<span style="color:#e6db74">&#34;uncaughtException&#34;</span>, <span style="color:#66d9ef">function</span> (<span style="color:#a6e22e">error</span>) {
+  <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">&#34;uncaughtException&#34;</span>, <span style="color:#a6e22e">error</span>);
+  <span style="color:#75715e">// 停止接受新的连接
+</span><span style="color:#75715e"></span>  <span style="color:#a6e22e">worker</span>.<span style="color:#a6e22e">close</span>(<span style="color:#66d9ef">function</span> () {
+    <span style="color:#75715e">// 所有已有连接断开后，退出进程
+</span><span style="color:#75715e"></span>    <span style="color:#a6e22e">process</span>.<span style="color:#a6e22e">exit</span>(<span style="color:#ae81ff">1</span>);
+  });
+});
+</code></pre></div><p>以上代码问题在于需要等到所有连接断开后进程才退出，在极端的情况下，所有工作进程都停止接受新的连接，全处在等待退出的状态。比如上述代码中，如果没有返回 400 的响应，那么客户端的连接会一直保持打开，当前工作进程也无法接受新的请求。</p>
+<p>但在等待进程全部退出重启的过程中，所有新来的请求可能存在没有工作进程微信用户服务的场景，这会丢掉大部分请求。在退出流程增加一个自杀信号，工作流程在得知退出时，向主进程发送一个自杀信号，然后才停止接受新的连接，当所有连接断开后才退出。主进程收到自杀信号后，立即创建新的工作进程服务。等待长连接断开可能需要较旧的时间，为此有必要为已有连接的断开设置一个超时时间。同时，异常退出记录日志有利于定位和追踪问题。完整代码如下：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-js" data-lang="js"><span style="color:#75715e">// master.js
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">net</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">require</span>(<span style="color:#e6db74">&#34;net&#34;</span>);
+<span style="color:#66d9ef">const</span> <span style="color:#a6e22e">cp</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">require</span>(<span style="color:#e6db74">&#34;child_process&#34;</span>);
+<span style="color:#66d9ef">const</span> <span style="color:#a6e22e">os</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">require</span>(<span style="color:#e6db74">&#34;os&#34;</span>);
+
+<span style="color:#66d9ef">const</span> <span style="color:#a6e22e">server</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">net</span>.<span style="color:#a6e22e">createServer</span>();
+<span style="color:#a6e22e">server</span>.<span style="color:#a6e22e">listen</span>(<span style="color:#ae81ff">1337</span>);
+
+<span style="color:#66d9ef">const</span> <span style="color:#a6e22e">workers</span> <span style="color:#f92672">=</span> {};
+<span style="color:#66d9ef">const</span> <span style="color:#a6e22e">createWorker</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">function</span> () {
+  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">worker</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">cp</span>.<span style="color:#a6e22e">fork</span>(<span style="color:#a6e22e">__dirname</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;/reboot-suicide-worker.js&#34;</span>);
+  <span style="color:#a6e22e">worker</span>.<span style="color:#a6e22e">on</span>(<span style="color:#e6db74">&#34;message&#34;</span>, <span style="color:#66d9ef">function</span> (<span style="color:#a6e22e">message</span>) {
+    <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">message</span>.<span style="color:#a6e22e">act</span> <span style="color:#f92672">===</span> <span style="color:#e6db74">&#34;suicide&#34;</span>) {
+      <span style="color:#a6e22e">createWorker</span>();
+    }
+  });
+  <span style="color:#75715e">// 退出时重新启动新的进程
+</span><span style="color:#75715e"></span>  <span style="color:#a6e22e">worker</span>.<span style="color:#a6e22e">on</span>(<span style="color:#e6db74">&#34;exit&#34;</span>, <span style="color:#66d9ef">function</span> () {
+    <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">&#34;Worker &#34;</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">worker</span>.<span style="color:#a6e22e">pid</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34; exited.&#34;</span>);
+    <span style="color:#66d9ef">delete</span> <span style="color:#a6e22e">workers</span>[<span style="color:#a6e22e">worker</span>.<span style="color:#a6e22e">pid</span>];
+  });
+  <span style="color:#75715e">// 句柄转发
+</span><span style="color:#75715e"></span>  <span style="color:#a6e22e">worker</span>.<span style="color:#a6e22e">send</span>(<span style="color:#e6db74">&#34;server&#34;</span>, <span style="color:#a6e22e">server</span>);
+  <span style="color:#a6e22e">workers</span>[<span style="color:#a6e22e">worker</span>.<span style="color:#a6e22e">pid</span>] <span style="color:#f92672">=</span> <span style="color:#a6e22e">worker</span>;
+  <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">&#34;Create worker, pid: &#34;</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">worker</span>.<span style="color:#a6e22e">pid</span>);
+};
+
+<span style="color:#75715e">// const cpus = os.cpus();
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">let</span> <span style="color:#a6e22e">i</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; <span style="color:#a6e22e">i</span> <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">4</span>; <span style="color:#a6e22e">i</span><span style="color:#f92672">++</span>) {
+  <span style="color:#a6e22e">createWorker</span>();
+}
+
+<span style="color:#75715e">// 主进程退出时，退出所有工作进程
+</span><span style="color:#75715e"></span><span style="color:#a6e22e">process</span>.<span style="color:#a6e22e">on</span>(<span style="color:#e6db74">&#34;exit&#34;</span>, <span style="color:#66d9ef">function</span> (<span style="color:#a6e22e">code</span>, <span style="color:#a6e22e">signal</span>) {
+  <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">&#34;exit&#34;</span>, <span style="color:#a6e22e">code</span>, <span style="color:#a6e22e">signal</span>);
+  <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">const</span> <span style="color:#a6e22e">pid</span> <span style="color:#66d9ef">in</span> <span style="color:#a6e22e">workers</span>) {
+    <span style="color:#a6e22e">workers</span>[<span style="color:#a6e22e">pid</span>].<span style="color:#a6e22e">kill</span>();
+  }
+});
+
+<span style="color:#75715e">// 接收到 SIGINT 信号后(CTRL+C 或 kill -2 pid)，退出
+</span><span style="color:#75715e"></span><span style="color:#a6e22e">process</span>.<span style="color:#a6e22e">on</span>(<span style="color:#e6db74">&#34;SIGINT&#34;</span>, <span style="color:#66d9ef">function</span> (<span style="color:#a6e22e">code</span>, <span style="color:#a6e22e">signal</span>) {
+  <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">&#34;SIGINT&#34;</span>, <span style="color:#a6e22e">code</span>, <span style="color:#a6e22e">signal</span>);
+  <span style="color:#a6e22e">process</span>.<span style="color:#a6e22e">exit</span>(<span style="color:#ae81ff">0</span>);
+});
+
+<span style="color:#75715e">// sub.js
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">url</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">require</span>(<span style="color:#e6db74">&#34;url&#34;</span>);
+<span style="color:#66d9ef">const</span> <span style="color:#a6e22e">http</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">require</span>(<span style="color:#e6db74">&#34;http&#34;</span>);
+<span style="color:#66d9ef">const</span> <span style="color:#a6e22e">winston</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">require</span>(<span style="color:#e6db74">&#34;winston&#34;</span>);
+
+<span style="color:#66d9ef">const</span> <span style="color:#a6e22e">logger</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">winston</span>.<span style="color:#a6e22e">createLogger</span>({
+  <span style="color:#a6e22e">level</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;info&#34;</span>,
+  <span style="color:#a6e22e">format</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">winston</span>.<span style="color:#a6e22e">format</span>.<span style="color:#a6e22e">json</span>(),
+  <span style="color:#a6e22e">defaultMeta</span><span style="color:#f92672">:</span> { <span style="color:#a6e22e">service</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;user-service&#34;</span> },
+  <span style="color:#a6e22e">transports</span><span style="color:#f92672">:</span> [
+    <span style="color:#75715e">//
+</span><span style="color:#75715e"></span>    <span style="color:#75715e">// - Write all logs with level `error` and below to `error.log`
+</span><span style="color:#75715e"></span>    <span style="color:#75715e">// - Write all logs with level `info` and below to `combined.log`
+</span><span style="color:#75715e"></span>    <span style="color:#75715e">//
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">winston</span>.<span style="color:#a6e22e">transports</span>.<span style="color:#a6e22e">File</span>({ <span style="color:#a6e22e">filename</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;error.log&#34;</span>, <span style="color:#a6e22e">level</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;error&#34;</span> }),
+    <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">winston</span>.<span style="color:#a6e22e">transports</span>.<span style="color:#a6e22e">File</span>({ <span style="color:#a6e22e">filename</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;combined.log&#34;</span> }),
+  ],
+});
+
+<span style="color:#66d9ef">const</span> <span style="color:#a6e22e">server</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">http</span>.<span style="color:#a6e22e">createServer</span>(<span style="color:#66d9ef">function</span> (<span style="color:#a6e22e">req</span>, <span style="color:#a6e22e">res</span>) {
+  <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">url</span>.<span style="color:#a6e22e">parse</span>(<span style="color:#a6e22e">req</span>.<span style="color:#a6e22e">url</span>).<span style="color:#a6e22e">pathname</span> <span style="color:#f92672">===</span> <span style="color:#e6db74">&#34;/error&#34;</span>) {
+    <span style="color:#75715e">// 务必返回响应，否则连接会保持打开，无法断开，当前进程不会退出，新来的连接也会得不到响应
+</span><span style="color:#75715e"></span>    <span style="color:#a6e22e">res</span>.<span style="color:#a6e22e">writeHead</span>(<span style="color:#ae81ff">400</span>);
+    <span style="color:#a6e22e">res</span>.<span style="color:#a6e22e">end</span>(<span style="color:#e6db74">`unknown url, handled by child, pid id </span><span style="color:#e6db74">${</span><span style="color:#a6e22e">process</span>.<span style="color:#a6e22e">pid</span><span style="color:#e6db74">}</span><span style="color:#960050;background-color:#1e0010">\</span><span style="color:#e6db74">n`</span>);
+    <span style="color:#66d9ef">throw</span> <span style="color:#66d9ef">new</span> Error(<span style="color:#e6db74">&#34;unknown url&#34;</span>);
+  }
+  <span style="color:#a6e22e">res</span>.<span style="color:#a6e22e">writeHead</span>(<span style="color:#ae81ff">200</span>, { <span style="color:#e6db74">&#34;Content-Type&#34;</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;text/plain&#34;</span> });
+  <span style="color:#a6e22e">res</span>.<span style="color:#a6e22e">end</span>(<span style="color:#e6db74">&#34;handled by child, pid is &#34;</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">process</span>.<span style="color:#a6e22e">pid</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;\n&#34;</span>);
+});
+
+<span style="color:#66d9ef">let</span> <span style="color:#a6e22e">worker</span>;
+
+<span style="color:#a6e22e">process</span>.<span style="color:#a6e22e">on</span>(<span style="color:#e6db74">&#34;message&#34;</span>, <span style="color:#66d9ef">function</span> (<span style="color:#a6e22e">m</span>, <span style="color:#a6e22e">tcp</span>) {
+  <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">m</span> <span style="color:#f92672">===</span> <span style="color:#e6db74">&#34;server&#34;</span>) {
+    <span style="color:#a6e22e">worker</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">tcp</span>;
+    <span style="color:#a6e22e">worker</span>.<span style="color:#a6e22e">on</span>(<span style="color:#e6db74">&#34;connection&#34;</span>, <span style="color:#66d9ef">function</span> (<span style="color:#a6e22e">socket</span>) {
+      <span style="color:#a6e22e">server</span>.<span style="color:#a6e22e">emit</span>(<span style="color:#e6db74">&#34;connection&#34;</span>, <span style="color:#a6e22e">socket</span>);
+    });
+  }
+});
+
+<span style="color:#75715e">// https://nodejs.org/dist/latest-v14.x/docs/api/process.html#process_event_uncaughtexception
+</span><span style="color:#75715e"></span><span style="color:#a6e22e">process</span>.<span style="color:#a6e22e">on</span>(<span style="color:#e6db74">&#34;uncaughtException&#34;</span>, <span style="color:#66d9ef">function</span> (<span style="color:#a6e22e">error</span>) {
+  <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">&#34;uncaughtException&#34;</span>, <span style="color:#a6e22e">error</span>);
+  <span style="color:#75715e">// 记录日志
+</span><span style="color:#75715e"></span>  <span style="color:#a6e22e">logger</span>.<span style="color:#a6e22e">error</span>(<span style="color:#a6e22e">error</span>.<span style="color:#a6e22e">message</span>);
+  <span style="color:#75715e">// 发送自杀信号
+</span><span style="color:#75715e"></span>  <span style="color:#a6e22e">process</span>.<span style="color:#a6e22e">send</span>({ <span style="color:#a6e22e">act</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;suicide&#34;</span> });
+  <span style="color:#75715e">// 停止接受新的连接
+</span><span style="color:#75715e"></span>  <span style="color:#a6e22e">worker</span>.<span style="color:#a6e22e">close</span>(<span style="color:#66d9ef">function</span> () {
+    <span style="color:#75715e">// 所有已有连接断开后，退出进程
+</span><span style="color:#75715e"></span>    <span style="color:#a6e22e">process</span>.<span style="color:#a6e22e">exit</span>(<span style="color:#ae81ff">1</span>);
+  });
+  <span style="color:#75715e">// 5 秒后退出进程
+</span><span style="color:#75715e"></span>  <span style="color:#a6e22e">setTimeout</span>(<span style="color:#66d9ef">function</span> () {
+    <span style="color:#75715e">// 超时退出
+</span><span style="color:#75715e"></span>    <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">&#34;timeout&#34;</span>);
+    <span style="color:#a6e22e">process</span>.<span style="color:#a6e22e">exit</span>(<span style="color:#ae81ff">1</span>);
+  }, <span style="color:#ae81ff">5000</span>);
+});
+</code></pre></div><p>为了避免程序编写错误导致子进程在启动中就发生错误，主进程进而无限重新创建子进程，应当设置规则，不应当反复重启。在单位时间内规定只能重启多少次，超过限制就触发 giveup 事件，放弃重启。代码如下：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-js" data-lang="js"><span style="color:#75715e">// master.js
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">net</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">require</span>(<span style="color:#e6db74">&#34;net&#34;</span>);
+<span style="color:#66d9ef">const</span> <span style="color:#a6e22e">cp</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">require</span>(<span style="color:#e6db74">&#34;child_process&#34;</span>);
+<span style="color:#66d9ef">const</span> <span style="color:#a6e22e">os</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">require</span>(<span style="color:#e6db74">&#34;os&#34;</span>);
+
+<span style="color:#66d9ef">const</span> <span style="color:#a6e22e">server</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">net</span>.<span style="color:#a6e22e">createServer</span>();
+<span style="color:#a6e22e">server</span>.<span style="color:#a6e22e">listen</span>(<span style="color:#ae81ff">1337</span>);
+
+<span style="color:#75715e">// 重启次数
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">limit</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">10</span>;
+<span style="color:#75715e">// 时间单位
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">during</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">60000</span>;
+<span style="color:#66d9ef">let</span> <span style="color:#a6e22e">restart</span> <span style="color:#f92672">=</span> [];
+<span style="color:#66d9ef">const</span> <span style="color:#a6e22e">isTooFrequency</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">function</span> () {
+  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">time</span> <span style="color:#f92672">=</span> Date.<span style="color:#a6e22e">now</span>();
+  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">length</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">restart</span>.<span style="color:#a6e22e">push</span>(<span style="color:#a6e22e">time</span>);
+  <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">length</span> <span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">limit</span>) {
+    <span style="color:#a6e22e">restart</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">restart</span>.<span style="color:#a6e22e">slice</span>(<span style="color:#a6e22e">length</span> <span style="color:#f92672">-</span> <span style="color:#a6e22e">limit</span>, <span style="color:#a6e22e">length</span>);
+  }
+  <span style="color:#66d9ef">return</span> (
+    <span style="color:#a6e22e">restart</span>.<span style="color:#a6e22e">length</span> <span style="color:#f92672">&gt;=</span> <span style="color:#a6e22e">limit</span> <span style="color:#f92672">&amp;&amp;</span> <span style="color:#a6e22e">restart</span>[<span style="color:#a6e22e">restart</span>.<span style="color:#a6e22e">length</span> <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>] <span style="color:#f92672">-</span> <span style="color:#a6e22e">restart</span>[<span style="color:#ae81ff">0</span>] <span style="color:#f92672">&lt;</span> <span style="color:#a6e22e">during</span>
+  );
+};
+
+<span style="color:#66d9ef">const</span> <span style="color:#a6e22e">workers</span> <span style="color:#f92672">=</span> {};
+<span style="color:#66d9ef">const</span> <span style="color:#a6e22e">createWorker</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">function</span> () {
+  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">worker</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">cp</span>.<span style="color:#a6e22e">fork</span>(<span style="color:#a6e22e">__dirname</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;/reboot-suicide-worker.js&#34;</span>);
+  <span style="color:#a6e22e">worker</span>.<span style="color:#a6e22e">on</span>(<span style="color:#e6db74">&#34;message&#34;</span>, <span style="color:#66d9ef">function</span> (<span style="color:#a6e22e">message</span>) {
+    <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">message</span>.<span style="color:#a6e22e">act</span> <span style="color:#f92672">===</span> <span style="color:#e6db74">&#34;suicide&#34;</span>) {
+      <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">isTooFrequency</span>()) {
+        <span style="color:#75715e">// 触发 giveup 事件，不再重启
+</span><span style="color:#75715e"></span>        <span style="color:#a6e22e">process</span>.<span style="color:#a6e22e">emit</span>(<span style="color:#e6db74">&#34;giveup&#34;</span>, <span style="color:#a6e22e">restart</span>.<span style="color:#a6e22e">length</span>, <span style="color:#a6e22e">during</span>);
+        <span style="color:#66d9ef">return</span>;
+      }
+      <span style="color:#a6e22e">createWorker</span>();
+    }
+  });
+  <span style="color:#75715e">// 退出时重新启动新的进程
+</span><span style="color:#75715e"></span>  <span style="color:#a6e22e">worker</span>.<span style="color:#a6e22e">on</span>(<span style="color:#e6db74">&#34;exit&#34;</span>, <span style="color:#66d9ef">function</span> () {
+    <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">&#34;Worker &#34;</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">worker</span>.<span style="color:#a6e22e">pid</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34; exited.&#34;</span>);
+    <span style="color:#66d9ef">delete</span> <span style="color:#a6e22e">workers</span>[<span style="color:#a6e22e">worker</span>.<span style="color:#a6e22e">pid</span>];
+  });
+  <span style="color:#75715e">// 句柄转发
+</span><span style="color:#75715e"></span>  <span style="color:#a6e22e">worker</span>.<span style="color:#a6e22e">send</span>(<span style="color:#e6db74">&#34;server&#34;</span>, <span style="color:#a6e22e">server</span>);
+  <span style="color:#a6e22e">workers</span>[<span style="color:#a6e22e">worker</span>.<span style="color:#a6e22e">pid</span>] <span style="color:#f92672">=</span> <span style="color:#a6e22e">worker</span>;
+  <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">&#34;Create worker, pid: &#34;</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">worker</span>.<span style="color:#a6e22e">pid</span>);
+};
+
+<span style="color:#66d9ef">const</span> <span style="color:#a6e22e">cpus</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">os</span>.<span style="color:#a6e22e">cpus</span>();
+<span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">let</span> <span style="color:#a6e22e">i</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; <span style="color:#a6e22e">i</span> <span style="color:#f92672">&lt;</span> <span style="color:#a6e22e">cpus</span>.<span style="color:#a6e22e">length</span>; <span style="color:#a6e22e">i</span><span style="color:#f92672">++</span>) {
+  <span style="color:#a6e22e">createWorker</span>();
+}
+
+<span style="color:#a6e22e">process</span>.<span style="color:#a6e22e">on</span>(<span style="color:#e6db74">&#34;giveup&#34;</span>, <span style="color:#66d9ef">function</span> () {
+  <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">&#34;give up&#34;</span>);
+});
+
+<span style="color:#75715e">// 主进程退出时，退出所有工作进程
+</span><span style="color:#75715e"></span><span style="color:#a6e22e">process</span>.<span style="color:#a6e22e">on</span>(<span style="color:#e6db74">&#34;exit&#34;</span>, <span style="color:#66d9ef">function</span> (<span style="color:#a6e22e">code</span>, <span style="color:#a6e22e">signal</span>) {
+  <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">&#34;exit&#34;</span>, <span style="color:#a6e22e">code</span>, <span style="color:#a6e22e">signal</span>);
+  <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">const</span> <span style="color:#a6e22e">pid</span> <span style="color:#66d9ef">in</span> <span style="color:#a6e22e">workers</span>) {
+    <span style="color:#a6e22e">workers</span>[<span style="color:#a6e22e">pid</span>].<span style="color:#a6e22e">kill</span>();
+  }
+});
+
+<span style="color:#75715e">// 接收到 SIGINT 信号后(CTRL+C 或 kill -2 pid)，退出
+</span><span style="color:#75715e"></span><span style="color:#a6e22e">process</span>.<span style="color:#a6e22e">on</span>(<span style="color:#e6db74">&#34;SIGINT&#34;</span>, <span style="color:#66d9ef">function</span> (<span style="color:#a6e22e">code</span>, <span style="color:#a6e22e">signal</span>) {
+  <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">&#34;SIGINT&#34;</span>, <span style="color:#a6e22e">code</span>, <span style="color:#a6e22e">signal</span>);
+  <span style="color:#a6e22e">process</span>.<span style="color:#a6e22e">exit</span>(<span style="color:#ae81ff">0</span>);
+});
+
+
+<span style="color:#75715e">// sub.js
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">url</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">require</span>(<span style="color:#e6db74">&#34;url&#34;</span>);
+<span style="color:#66d9ef">const</span> <span style="color:#a6e22e">http</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">require</span>(<span style="color:#e6db74">&#34;http&#34;</span>);
+<span style="color:#66d9ef">const</span> <span style="color:#a6e22e">winston</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">require</span>(<span style="color:#e6db74">&#34;winston&#34;</span>);
+
+<span style="color:#66d9ef">const</span> <span style="color:#a6e22e">logger</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">winston</span>.<span style="color:#a6e22e">createLogger</span>({
+  <span style="color:#a6e22e">level</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;info&#34;</span>,
+  <span style="color:#a6e22e">format</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">winston</span>.<span style="color:#a6e22e">format</span>.<span style="color:#a6e22e">json</span>(),
+  <span style="color:#a6e22e">defaultMeta</span><span style="color:#f92672">:</span> { <span style="color:#a6e22e">service</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;user-service&#34;</span> },
+  <span style="color:#a6e22e">transports</span><span style="color:#f92672">:</span> [
+    <span style="color:#75715e">//
+</span><span style="color:#75715e"></span>    <span style="color:#75715e">// - Write all logs with level `error` and below to `error.log`
+</span><span style="color:#75715e"></span>    <span style="color:#75715e">// - Write all logs with level `info` and below to `combined.log`
+</span><span style="color:#75715e"></span>    <span style="color:#75715e">//
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">winston</span>.<span style="color:#a6e22e">transports</span>.<span style="color:#a6e22e">File</span>({ <span style="color:#a6e22e">filename</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;error.log&#34;</span>, <span style="color:#a6e22e">level</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;error&#34;</span> }),
+    <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">winston</span>.<span style="color:#a6e22e">transports</span>.<span style="color:#a6e22e">File</span>({ <span style="color:#a6e22e">filename</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;combined.log&#34;</span> }),
+  ],
+});
+
+<span style="color:#66d9ef">const</span> <span style="color:#a6e22e">server</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">http</span>.<span style="color:#a6e22e">createServer</span>(<span style="color:#66d9ef">function</span> (<span style="color:#a6e22e">req</span>, <span style="color:#a6e22e">res</span>) {
+  <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">url</span>.<span style="color:#a6e22e">parse</span>(<span style="color:#a6e22e">req</span>.<span style="color:#a6e22e">url</span>).<span style="color:#a6e22e">pathname</span> <span style="color:#f92672">===</span> <span style="color:#e6db74">&#34;/error&#34;</span>) {
+    <span style="color:#75715e">// 务必返回响应，否则连接会保持打开，无法断开，当前进程不会退出，新来的连接也会得不到响应
+</span><span style="color:#75715e"></span>    <span style="color:#a6e22e">res</span>.<span style="color:#a6e22e">writeHead</span>(<span style="color:#ae81ff">400</span>);
+    <span style="color:#a6e22e">res</span>.<span style="color:#a6e22e">end</span>(<span style="color:#e6db74">`unknown url, handled by child, pid id </span><span style="color:#e6db74">${</span><span style="color:#a6e22e">process</span>.<span style="color:#a6e22e">pid</span><span style="color:#e6db74">}</span><span style="color:#960050;background-color:#1e0010">\</span><span style="color:#e6db74">n`</span>);
+    <span style="color:#66d9ef">throw</span> <span style="color:#66d9ef">new</span> Error(<span style="color:#e6db74">&#34;unknown url&#34;</span>);
+  }
+  <span style="color:#a6e22e">res</span>.<span style="color:#a6e22e">writeHead</span>(<span style="color:#ae81ff">200</span>, { <span style="color:#e6db74">&#34;Content-Type&#34;</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;text/plain&#34;</span> });
+  <span style="color:#a6e22e">res</span>.<span style="color:#a6e22e">end</span>(<span style="color:#e6db74">&#34;handled by child, pid is &#34;</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">process</span>.<span style="color:#a6e22e">pid</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;\n&#34;</span>);
+});
+
+<span style="color:#66d9ef">let</span> <span style="color:#a6e22e">worker</span>;
+
+<span style="color:#a6e22e">process</span>.<span style="color:#a6e22e">on</span>(<span style="color:#e6db74">&#34;message&#34;</span>, <span style="color:#66d9ef">function</span> (<span style="color:#a6e22e">m</span>, <span style="color:#a6e22e">tcp</span>) {
+  <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">m</span> <span style="color:#f92672">===</span> <span style="color:#e6db74">&#34;server&#34;</span>) {
+    <span style="color:#a6e22e">worker</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">tcp</span>;
+    <span style="color:#a6e22e">worker</span>.<span style="color:#a6e22e">on</span>(<span style="color:#e6db74">&#34;connection&#34;</span>, <span style="color:#66d9ef">function</span> (<span style="color:#a6e22e">socket</span>) {
+      <span style="color:#a6e22e">server</span>.<span style="color:#a6e22e">emit</span>(<span style="color:#e6db74">&#34;connection&#34;</span>, <span style="color:#a6e22e">socket</span>);
+    });
+    <span style="color:#75715e">// 模拟在启动中抛出异常
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">throw</span> <span style="color:#66d9ef">new</span> Error(<span style="color:#e6db74">&#34;error in startup&#34;</span>);
+  }
+});
+
+<span style="color:#75715e">// https://nodejs.org/dist/latest-v14.x/docs/api/process.html#process_event_uncaughtexception
+</span><span style="color:#75715e"></span><span style="color:#a6e22e">process</span>.<span style="color:#a6e22e">on</span>(<span style="color:#e6db74">&#34;uncaughtException&#34;</span>, <span style="color:#66d9ef">function</span> (<span style="color:#a6e22e">error</span>) {
+  <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">&#34;uncaughtException&#34;</span>, <span style="color:#a6e22e">error</span>);
+  <span style="color:#75715e">// 记录日志
+</span><span style="color:#75715e"></span>  <span style="color:#a6e22e">logger</span>.<span style="color:#a6e22e">error</span>(<span style="color:#a6e22e">error</span>.<span style="color:#a6e22e">message</span>);
+  <span style="color:#75715e">// 发送自杀信号
+</span><span style="color:#75715e"></span>  <span style="color:#a6e22e">process</span>.<span style="color:#a6e22e">send</span>({ <span style="color:#a6e22e">act</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;suicide&#34;</span> });
+  <span style="color:#75715e">// 停止接受新的连接
+</span><span style="color:#75715e"></span>  <span style="color:#a6e22e">worker</span>.<span style="color:#a6e22e">close</span>(<span style="color:#66d9ef">function</span> () {
+    <span style="color:#75715e">// 所有已有连接断开后，退出进程
+</span><span style="color:#75715e"></span>    <span style="color:#a6e22e">process</span>.<span style="color:#a6e22e">exit</span>(<span style="color:#ae81ff">1</span>);
+  });
+  <span style="color:#75715e">// 5 秒后退出进程
+</span><span style="color:#75715e"></span>  <span style="color:#a6e22e">setTimeout</span>(<span style="color:#66d9ef">function</span> () {
+    <span style="color:#75715e">// 超时退出
+</span><span style="color:#75715e"></span>    <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">&#34;timeout&#34;</span>);
+    <span style="color:#a6e22e">process</span>.<span style="color:#a6e22e">exit</span>(<span style="color:#ae81ff">1</span>);
+  }, <span style="color:#ae81ff">5000</span>);
+});
+
+</code></pre></div><h3 id="负载均衡">负载均衡</h3>
+<p>Node 默认提供的机制是采用操作系统的抢占式策略，各个进程根据自己的繁忙程度来进行抢占。Node 进程的繁忙由 CPU, I/O 两个部分构成，影响抢占的是 CPU 的繁忙度。如果 I/O 繁忙而 CPU 空闲则会造成某个进程能抢到较多请求，导致负载不均衡。</p>
+<p>为此 Node 提供了新的策略 <strong>Round-Robin 轮叫调度</strong>。主进程接受连接，将其依次分发给工作进程。策略是在 N 个工作进程中，每次选择第 i = (i + 1) mod n 个进程来发送连接。</p>
+<h3 id="状态共享">状态共享</h3>
+<p>Node 不允许在多个进程之间共享数据。实际业务中需要共享一些数据，可以采用以下几种方案：</p>
+<ol>
+<li>第三方数据存储
+将数据存放到数据库、磁盘文件、缓存服务（如 redis）中，所有工作进程在启动时将其读取到内存中。状态发生改变，需要通知到各个子进程。<br>
+<strong>定时轮询</strong>：轮询时间的设置是关键。
+<strong>主动通知</strong>：当数据发生更新时，主动通知子进程。专门用来发送通知和查询状态是否更改的进程叫做通知进程。这个进程只进行轮询和通知，不处理任何业务逻辑。推送机制如果按照进程间信号传递，在跨多台服务器时会失效，可以采用 tcp 或 udp 的方案。进程在启动时从通知服务处除了读取第一次数据外，还将进程信息注册到通知服务处。通知进程通过轮询发现数据更新后，根据注册信息，将更新后的数据发送给工作进程。</li>
+</ol>
+<h2 id="cluster-模块">cluster 模块</h2>
+<p>Node.js v0.8 版本引入 cluster 模块，用以解决多核 CPU 的利用率问题同时也提供了较为完善的 API 用于处理进程的健壮性问题。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-js" data-lang="js"><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">cluster</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">require</span>(<span style="color:#e6db74">&#34;cluster&#34;</span>);
+<span style="color:#66d9ef">const</span> <span style="color:#a6e22e">http</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">require</span>(<span style="color:#e6db74">&#34;http&#34;</span>);
+<span style="color:#66d9ef">const</span> <span style="color:#a6e22e">os</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">require</span>(<span style="color:#e6db74">&#34;os&#34;</span>);
+
+<span style="color:#66d9ef">const</span> <span style="color:#a6e22e">numCpus</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">os</span>.<span style="color:#a6e22e">cpus</span>().<span style="color:#a6e22e">length</span>;
+
+<span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">cluster</span>.<span style="color:#a6e22e">isMaster</span>) {
+  <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">`Master </span><span style="color:#e6db74">${</span><span style="color:#a6e22e">process</span>.<span style="color:#a6e22e">pid</span><span style="color:#e6db74">}</span><span style="color:#e6db74"> is running`</span>);
+
+  <span style="color:#75715e">// Fork workers
+</span><span style="color:#75715e"></span>  <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">let</span> <span style="color:#a6e22e">i</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; <span style="color:#a6e22e">i</span> <span style="color:#f92672">&lt;</span> <span style="color:#a6e22e">numCpus</span>; <span style="color:#a6e22e">i</span><span style="color:#f92672">++</span>) {
+    <span style="color:#a6e22e">cluster</span>.<span style="color:#a6e22e">fork</span>();
+  }
+
+  <span style="color:#a6e22e">cluster</span>.<span style="color:#a6e22e">on</span>(<span style="color:#e6db74">&#34;exit&#34;</span>, <span style="color:#66d9ef">function</span> (<span style="color:#a6e22e">worker</span>, <span style="color:#a6e22e">code</span>, <span style="color:#a6e22e">signal</span>) {
+    <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">`worker </span><span style="color:#e6db74">${</span><span style="color:#a6e22e">worker</span>.<span style="color:#a6e22e">process</span>.<span style="color:#a6e22e">pid</span><span style="color:#e6db74">}</span><span style="color:#e6db74"> died`</span>);
+  });
+} <span style="color:#66d9ef">else</span> {
+  <span style="color:#75715e">// Workers can share ant TCP connection
+</span><span style="color:#75715e"></span>  <span style="color:#75715e">// In this case it is a HTTP server
+</span><span style="color:#75715e"></span>  <span style="color:#a6e22e">http</span>
+    .<span style="color:#a6e22e">createServer</span>(<span style="color:#66d9ef">function</span> (<span style="color:#a6e22e">req</span>, <span style="color:#a6e22e">res</span>) {
+      <span style="color:#a6e22e">res</span>.<span style="color:#a6e22e">writeHead</span>(<span style="color:#ae81ff">200</span>);
+      <span style="color:#a6e22e">res</span>.<span style="color:#a6e22e">end</span>(<span style="color:#e6db74">&#34;hello world\n&#34;</span>);
+    })
+    .<span style="color:#a6e22e">listen</span>(<span style="color:#ae81ff">8000</span>);
+  <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">`Worker </span><span style="color:#e6db74">${</span><span style="color:#a6e22e">process</span>.<span style="color:#a6e22e">pid</span><span style="color:#e6db74">}</span><span style="color:#e6db74"> started`</span>);
+}
+</code></pre></div><p>cluster 模块就是 child_process 和 net 模块的组合应用。cluster 启动时，内部会启动 tcp 服务器，在 cluster.fork() 子进程后，将这个 tcp 服务器端 socket 的文件描述符发送给工作进程。如果进程是通过 cluster.fork() 复制出来的，那么它的环境变量里就存在 NODE_UNIQUE_ID, 如果工作进程中存在 listen 侦听网络端口的调用，它将拿到该文件描述符，通过 SO_REUSEADDR 端口重用，从而实现多个子进程共享端口。对于普通方式启动的进程，则不存在文件描述传递共享等事情。</p>
+<h2 id="worker_threads-模块">worker_threads 模块</h2>
+<p>worker_thread 模块使得并行执行 JavaScript 线程成为可能。workers(threads) 对于 CPU 密集型的操作很有用，对于 I/O 密集型任务，使用 Node.js 内置的 I/O 操作更高效。</p>
+<p>与 child_process 或 cluster 模块不同的是，worker_threads 能够共享内存。通过传递 ArrayBuffer 实例或共享 SharedArrayBuffer 实例达到这一目标。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-js" data-lang="js"><span style="color:#66d9ef">const</span> {
+  <span style="color:#a6e22e">Worker</span>,
+  <span style="color:#a6e22e">isMainThread</span>,
+  <span style="color:#a6e22e">parentPort</span>,
+  <span style="color:#a6e22e">workerData</span>,
+} <span style="color:#f92672">=</span> <span style="color:#a6e22e">require</span>(<span style="color:#e6db74">&#34;worker_threads&#34;</span>);
+
+<span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">isMainThread</span>) {
+  <span style="color:#a6e22e">module</span>.<span style="color:#a6e22e">exports</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">parseJSAsync</span>(<span style="color:#a6e22e">script</span>) {
+    <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">new</span> Promise((<span style="color:#a6e22e">resolve</span>, <span style="color:#a6e22e">reject</span>) =&gt; {
+      <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">worker</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">Worker</span>(<span style="color:#a6e22e">__filename</span>, {
+        <span style="color:#a6e22e">workerData</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">script</span>,
+      });
+      <span style="color:#a6e22e">worker</span>.<span style="color:#a6e22e">on</span>(<span style="color:#e6db74">&#34;message&#34;</span>, <span style="color:#a6e22e">resolve</span>);
+      <span style="color:#a6e22e">worker</span>.<span style="color:#a6e22e">on</span>(<span style="color:#e6db74">&#34;error&#34;</span>, <span style="color:#a6e22e">reject</span>);
+      <span style="color:#a6e22e">worker</span>.<span style="color:#a6e22e">on</span>(<span style="color:#e6db74">&#34;exit&#34;</span>, (<span style="color:#a6e22e">code</span>) =&gt; {
+        <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">code</span> <span style="color:#f92672">!=</span> <span style="color:#ae81ff">0</span>) {
+          <span style="color:#a6e22e">reject</span>(<span style="color:#66d9ef">new</span> Error(<span style="color:#e6db74">`Worker stopped with exit code </span><span style="color:#e6db74">${</span><span style="color:#a6e22e">code</span><span style="color:#e6db74">}</span><span style="color:#e6db74">`</span>));
+        }
+      });
+    });
+  };
+} <span style="color:#66d9ef">else</span> {
+  <span style="color:#66d9ef">const</span> { <span style="color:#a6e22e">parse</span> } <span style="color:#f92672">=</span> <span style="color:#a6e22e">require</span>(<span style="color:#e6db74">&#34;some-js-parse-library&#34;</span>);
+  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">script</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">workerData</span>;
+  <span style="color:#a6e22e">parentPort</span>.<span style="color:#a6e22e">postMessage</span>(<span style="color:#a6e22e">parse</span>(<span style="color:#a6e22e">script</span>));
+}
+</code></pre></div><p>worker_threads 模块：https://nodejs.org/dist/latest-v14.x/docs/api/worker_threads.html</p>
+
+		</section>
+
+		<div class="post-tags">
+			
+			
+			<nav class="nav tags">
+				<ul class="tags">
+					
+					<li><a href="/posts/tags/node">Node</a></li>
+					
+				</ul>
+			</nav>
+			
+			
+		</div>
+	</article>
+</main>
+<footer>
+<hr>⚡️
+	2020  © yrjkqq |  <a href="https://github.com/athul/archie">Archie Theme</a> | Built with <a href="https://gohugo.io">Hugo</a>
+</footer>
+
+
+</div>
+    </body>
+</html>
