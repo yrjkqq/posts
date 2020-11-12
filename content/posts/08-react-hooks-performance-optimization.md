@@ -3,7 +3,7 @@ title: "React Hooks 性能优化"
 date: 2020-11-13T00:35:00+08:00
 description: "探索使用 React Hooks 后常用的优化手段"
 draft: false
-tags: [Node]
+tags: [React]
 ---
 
 React 16.8.0 引入 Hook 之后，新写的项目中基本上全部采用 Hook 的写法。

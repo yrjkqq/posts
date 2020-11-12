@@ -3,12 +3,12 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
-    <loc>https://yrjkqq.github.io/posts/tags/node/</loc>
+    <loc>https://yrjkqq.github.io/posts/posts/</loc>
     <lastmod>2020-11-13T00:35:00+08:00</lastmod>
   </url>
   
   <url>
-    <loc>https://yrjkqq.github.io/posts/posts/</loc>
+    <loc>https://yrjkqq.github.io/posts/tags/react/</loc>
     <lastmod>2020-11-13T00:35:00+08:00</lastmod>
   </url>
   
@@ -30,6 +30,11 @@
   <url>
     <loc>https://yrjkqq.github.io/posts/posts/09-react-fiber/</loc>
     <lastmod>2020-11-12T11:12:00+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://yrjkqq.github.io/posts/tags/node/</loc>
+    <lastmod>2020-11-05T15:30:00+08:00</lastmod>
   </url>
   
   <url>

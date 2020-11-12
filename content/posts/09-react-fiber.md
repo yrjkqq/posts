@@ -3,7 +3,7 @@ title: "React Fiber 架构"
 date: 2020-11-12T11:12:00+08:00
 description: "React 16 引入新的 Fiber 架构"
 draft: false
-tags: [Node]
+tags: [React]
 ---
 
 Fiber 架构主要是使用了新的 reconciler 调谐器，区别于 React 15 的 stack reconciler 调谐器。
