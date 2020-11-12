@@ -7,7 +7,23 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>© yrjkqq</copyright>
-    <lastBuildDate>Thu, 05 Nov 2020 15:30:00 +0800</lastBuildDate><atom:link href="https://yrjkqq.github.io/posts/tags/node/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Fri, 13 Nov 2020 00:35:00 +0800</lastBuildDate><atom:link href="https://yrjkqq.github.io/posts/tags/node/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>React Hooks 性能优化</title>
+      <link>https://yrjkqq.github.io/posts/posts/08-react-hooks-performance-optimization/</link>
+      <pubDate>Fri, 13 Nov 2020 00:35:00 +0800</pubDate>
+      
+      <guid>https://yrjkqq.github.io/posts/posts/08-react-hooks-performance-optimization/</guid>
+      <description>React 16.8.0 引入 Hook 之后，新写的项目中基本上全部采用 Hook 的写法。
+Hook 与 Class 相比，主要带来以下几方面的优势：
+ 复杂组件变得难以理解
+Class 组件中需要将各个业务代码写在各个生命周期函数中，可能存在同样的功能分布在各个生命周期函数中，代码逻混乱，尤其是在复杂组件中。而 Hook 将组件中相互关联的部分拆分成更小的函数，而非强制按照生命周期划分。 在组件之间复用状态逻辑很难
+React 中会使用到 render props 或 高阶组件 来解决逻辑复用的问题，但这些方式需要改变代码结构，例如使用高阶函数后会产生组件嵌套，层次太多就会产生嵌套地狱。而 Hook 从组件中提取状态逻辑，使得这些逻辑可以单独测试并复用，并且无需修改代码结构。 难以理解的 Class
+Class 由于 JavaScript 语言的特殊性，在实现方面没有稳定的提案，相比于函数式组件学习成本更高，例如 this 的使用或者绑定事件函数。同时，Class 组件会使一些新的优化手段无法在 React 实现，例如组件预编译。而且 Class 不能进行很好的压缩。  Hook 可以在使用函数式组件的情况下使用到更多的 React 特性。但是切换到 Hook 之后，就会就会存在之前的一些优化手段需要使用对应的 Hook 写法。
+使用 Class 组件时，常见的优化手段：
+ Component 类组件使用 shouldComponentUpdate 可以根据 shouldComponentUpdate 的返回值，判断 React 组件的输出是否受当前 state 或 props 更改的影响。在该方法内部进行对变化前后的 props 和 state 进行比较，返回则会跳过更新，即不会吊桶 render() 和 componentDidUpdate().</description>
+    </item>
+    
     <item>
       <title>URL 模块和 querystring 模块</title>
       <link>https://yrjkqq.github.io/posts/posts/07-url-urlsearchparams-querystring/</link>
