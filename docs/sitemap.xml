@@ -3,8 +3,28 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
+    <loc>https://yrjkqq.github.io/posts/tags/javascript/</loc>
+    <lastmod>2020-11-19T01:50:00+08:00</lastmod>
+  </url>
+  
+  <url>
     <loc>https://yrjkqq.github.io/posts/posts/</loc>
-    <lastmod>2020-11-19T00:08:00+08:00</lastmod>
+    <lastmod>2020-11-19T01:50:00+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://yrjkqq.github.io/posts/posts/11-setinterval-vs-settimeout/</loc>
+    <lastmod>2020-11-19T01:50:00+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://yrjkqq.github.io/posts/tags/</loc>
+    <lastmod>2020-11-19T01:50:00+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://yrjkqq.github.io/posts/</loc>
+    <lastmod>2020-11-19T01:50:00+08:00</lastmod>
   </url>
   
   <url>
@@ -14,16 +34,6 @@
   
   <url>
     <loc>https://yrjkqq.github.io/posts/posts/10-performance-optimization-with-immutable/</loc>
-    <lastmod>2020-11-19T00:08:00+08:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://yrjkqq.github.io/posts/tags/</loc>
-    <lastmod>2020-11-19T00:08:00+08:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://yrjkqq.github.io/posts/</loc>
     <lastmod>2020-11-19T00:08:00+08:00</lastmod>
   </url>
   
@@ -45,11 +55,6 @@
   <url>
     <loc>https://yrjkqq.github.io/posts/posts/07-url-urlsearchparams-querystring/</loc>
     <lastmod>2020-11-05T15:30:00+08:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://yrjkqq.github.io/posts/tags/javascript/</loc>
-    <lastmod>2020-05-12T09:45:00+08:00</lastmod>
   </url>
   
   <url>
