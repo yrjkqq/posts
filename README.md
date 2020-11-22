@@ -2,6 +2,12 @@
 
 https://yrjkqq.github.io/posts/
 
+## development
+
+```bash
+hugo serve .
+```
+
 ## deploy
 
 在本地运行 ./deploy.sh 执行编译并推送到远端。
