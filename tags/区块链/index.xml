@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>区块链 on That's the Way It Is</title><link>https://yrjkqq.github.io/posts/tags/%E5%8C%BA%E5%9D%97%E9%93%BE/</link><description>Recent content in 区块链 on That's the Way It Is</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><copyright>© yrjkqq</copyright><lastBuildDate>Sun, 22 Nov 2020 18:40:00 +0800</lastBuildDate><atom:link href="https://yrjkqq.github.io/posts/tags/%E5%8C%BA%E5%9D%97%E9%93%BE/index.xml" rel="self" type="application/rss+xml"/><item><title>区块链和加密货币是什么？</title><link>https://yrjkqq.github.io/posts/posts/12-blockchain-tour-part1/</link><pubDate>Sun, 22 Nov 2020 18:40:00 +0800</pubDate><guid>https://yrjkqq.github.io/posts/posts/12-blockchain-tour-part1/</guid><description>通过 币安学院 的系列文章，来学习区块链和加密货币相关知识。
+加密货币中不存在机构。
+公钥密码学 借助密码学和高等数学来保护资金的安全。加密货币生态系统中使用的密码学是公钥密码学（PKC）, 又称非对称密码学。RSA 是最常见的非对称加密算法。RSA 中通过两个大质数相乘得到公共模数生成密钥。PKC 的应用：
+加密电子邮件 HTTPS 中的安全套接层（SSL）协议 安全电子投票 区块链和加密货币 椭圆曲线数字签名算法（ECDSA）用于比特币和其他加密货币系统，用于确保存储在区块链的上数据的安全性以及验证交易事务。
+数字签名适用于验证数字和数据真实性和完整性的加密机制。PKC 可以应用于生成数字签名。本质上，该过程发送方使用自己的私钥对消息（数据）的哈希值进行加密。接下来，消息的接收方可以使用签名者提供的公钥来检查该数字签名是否有效。
+比特币区块链使用 PKC 和数字签名，这个过程中没有进行加密。比特币又部署了 ECDSA 来验证交易。
+加密货币中，数字签名包含三个基本流程：散列、签名和验证。</description></item></channel></rss>
