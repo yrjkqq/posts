@@ -19,6 +19,11 @@ pygmentscodefencesguesssyntax = true
 # Main menu Items
 
 [[menu.main]]
+name = "All"
+url = "/posts"
+weight = 2
+
+[[menu.main]]
 name = "Tags"
 url = "/tags"
 weight = 1
