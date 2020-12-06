@@ -8,9 +8,11 @@ tags: [React]
 
 React 官方[贡献指南](https://reactjs.org/docs/how-to-contribute.html#contribution-prerequisites)中提到，运行 React 源代码需要使用到 JDK, 而且在使用 `yarn build` 时，如果没有安装 JDK 则会报错，这是为什么呢？要 Java 做什么呢？本文将一探究竟。
 
-`yarn build` 会运行 `node ./scripts/rollup/build.js` 脚本，运行完会输出 ![整个异步 I/O 的执行流程](/posts/img/Snipaste_2020-12-06_18-08-44)，控制台会打印一个表格，这个表格是不是就是用到 Java 相关的输出的呢？
+`yarn build` 会运行 `node ./scripts/rollup/build.js` 脚本，运行完会输出: ![yarn build output](/posts/img/Snipaste_2020-12-06_18-08-44.png)
 
-这个表格使用 `cli-table` 和 `chalk` 库实现的，与 Java 无关。`printResults` 方法会获取 table 类型的数据。
+控制台会打印一个表格，这个表格是不是就是用到 Java 相关的库输出的呢？
+
+这个表格是使用 `cli-table` 和 `chalk` 库实现的，与 Java 无关。`printResults` 方法会获取 table 类型的数据。
 ```js
 // scripts\rollup\build.js
 async function buildEverything() {

@@ -1,6 +1,6 @@
 ---
 title: "React.isValidElement 如何实现？"
-date: 2020-12-06T11:16:00+08:00
+date: 2020-12-06T16:00:00+08:00
 description: "isValidElement 实现原理一探究竟"
 draft: false
 tags: [React]
