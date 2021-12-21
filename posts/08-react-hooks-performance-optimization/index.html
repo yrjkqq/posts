@@ -32,4 +32,4 @@
   <span style=color:#a6e22e>doSomething</span>(<span style=color:#a6e22e>a</span>, <span style=color:#a6e22e>b</span>);
 }, [<span style=color:#a6e22e>a</span>, <span style=color:#a6e22e>b</span>]);
 </code></pre></div></li><li>使用 useMemo 来控制子节点何时更新，而不直接使用 PureComponent</li><li>使用 useReducer，不传递回调函数，而传递 dispatch 函数，因为 dispatch 函数在重新渲染之间是保持稳定的</li></ul></li><li><p><strong>如何避免向下传递回调？</strong><br>组件树中传递回调函数在写法上更明确，但是管理很麻烦，而且存在上一节中存在的问题。在大型的组件树中，可以通过用 context 用 useReducer 往下传递 dispatch 函数，这样更加方便维护，不用不断转发回调。<code>dispatch 是处理深度更新的推荐模式。</code>子组件使用 dispatch 函数向上传递 action 来更新 content.</p></li></ul></section><div class=post-tags><nav class="nav tags"><ul class=tags><li><a href=/posts/tags/react>React</a></li></ul></nav></div></article></main><footer><hr>⚡️
-2020 © yrjkqq | <a href=https://github.com/athul/archie>Archie Theme</a> | Built with <a href=https://gohugo.io>Hugo</a></footer></div></body></html>
+2021 © yrjkqq | <a href=https://github.com/athul/archie>Archie Theme</a> | Built with <a href=https://gohugo.io>Hugo</a></footer></div></body></html>

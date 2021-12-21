@@ -123,4 +123,4 @@
   }
 }
 </code></pre></div><p>此时，函数 multiply 被压入执行栈栈顶进行执行。在函数执行完成后，multiply 函数出栈，返回值存储在变量 c 中，执行栈从栈底取出全局执行上下文继续运行，运行完程序退出。</p><p><strong>注意：</strong> 在创建执行上下文的创建阶段中，let 和 const 定义的变量没有关联到任何值，而 var 声明的变量设置为 undefined. 在创建阶段时 JavaScript 引擎扫描代码用于变量和函数声明，函数声明存储在环境中，而变量初始化为 undefined（使用 var 声明）或者是保持未初始化状态（使用 let 和 const 声明）。所以可以在声明 var 变量前访问到，其值为 undefined, 而访问 let 或 const 声明的变量会报错。即<strong>变量提升</strong>。</p><p><strong>注意：</strong> 在执行阶段，如果 JavaScript 引擎在 let 声明的地方没有找到对应的值，则该变量会被赋值为 undefined.</p><blockquote><p>相关代码在 <a href=https://github.com/yrjkqq/learn-nodejs/blob/master/basic-javascript/environment-record.js>basic-javascript</a></p></blockquote></section><div class=post-tags><nav class="nav tags"><ul class=tags><li><a href=/posts/tags/javascript>JavaScript</a></li></ul></nav></div></article></main><footer><hr>⚡️
-2020 © yrjkqq | <a href=https://github.com/athul/archie>Archie Theme</a> | Built with <a href=https://gohugo.io>Hugo</a></footer></div></body></html>
+2021 © yrjkqq | <a href=https://github.com/athul/archie>Archie Theme</a> | Built with <a href=https://gohugo.io>Hugo</a></footer></div></body></html>

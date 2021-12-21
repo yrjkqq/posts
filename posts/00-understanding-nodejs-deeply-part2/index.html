@@ -50,4 +50,4 @@
   <span style=color:#a6e22e>console</span>.<span style=color:#a6e22e>log</span>(<span style=color:#a6e22e>buf</span>.<span style=color:#a6e22e>toString</span>(<span style=color:#e6db74>&#34;utf-8&#34;</span>));
 });
 </code></pre></div><h3 id=buffer-与性能>Buffer 与性能</h3><p>在 web 应用中，提高字符串转换到 Buffer 的效率，可以达成的地提高网络吞吐率。<br>使用 <a href=https://www.tutorialspoint.com/apache_bench/apache_bench_environment_setup.htm>apache ab</a> 工具可以测试 web 服务器的性能，比较转换到 buffer 和不转换的 QPS(每秒查询次数)。<br>在 Node 构建的 web 应用中，可以选择将页面中的动态内容和精通内容分离，静态内容部分可以通过预先转换为 Buffer 的方式提高性能。文件读取尽量只读取为 buffer 然后直接传输，不做额外的转换。</p><h2 id=第-7-章-网络编程>第 7 章 网络编程</h2><p>直接看原书。</p><h2 id=地-8-章-构建-web-应用>地 8 章 构建 web 应用</h2><p>直接看原书。</p></section><div class=post-tags><nav class="nav tags"><ul class=tags><li><a href=/posts/tags/node>Node</a></li></ul></nav></div></article></main><footer><hr>⚡️
-2020 © yrjkqq | <a href=https://github.com/athul/archie>Archie Theme</a> | Built with <a href=https://gohugo.io>Hugo</a></footer></div></body></html>
+2021 © yrjkqq | <a href=https://github.com/athul/archie>Archie Theme</a> | Built with <a href=https://gohugo.io>Hugo</a></footer></div></body></html>
