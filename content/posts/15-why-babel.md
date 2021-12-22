@@ -7,6 +7,7 @@ tags: [重学前端]
 ---
 
 > 经过这几年的前端工作，我觉得有必要停下来回顾一下这些年用过的前端工具，一方面是学习这些新工具的新的生机，一方面也是对现有知识的梳理，期望找出自身的不足。
+> 
 > 在网上发现一个资源:[前端路线图](http://codylindley.com/)
 
 
@@ -28,3 +29,46 @@ Babel 可以将浏览器暂不支持的语法通过添加腻子脚本转换为�
 7. Babel 通过 [assumptions(假定)](https://babeljs.io/docs/en/assumptions) 来去掉一些假定代码中不会使用到的代码腻子脚本来减小体积 
 
 ## babel 怎么使用？
+
+1. 引入 @babel/polyfill
+
+安装 `yarn add @babel/polyfill` 后在配置文件中增加 `"useBuiltIns": "usage"` 来只引入使用到的 polyfill，`@babel/polyfill` 会自动安装 2.6.12 版本的 `core-js`
+```js
+// babel.config.js
+const presets = [
+  [
+    "@babel/preset-env",
+    {
+      targets: {
+        edge: "17",
+        firefox: "60",
+        chrome: "67",
+        safari: "11.1",
+      },
+      useBuiltIns: "usage",
+      corejs: "2.6.12",
+    },
+  ],
+];
+
+module.exports = { presets };
+```
+输出结果如下：
+![yarn build output](/posts/img/Snipaste_2021-12-22_11-22-55.png)
+从输入结果可以看出，使用 `useBuiltIns: "usage"` 后只引入了使用到的 polyfill
+
+如果没有使用 usage 选项，那就必须安装 `core-js` 和 `regenerator-runtime` 然后在入口文件处引入其他文件之前一次性引入全量的 polyfill，并设置 `"useBuiltIns": "entry"`，如下所示：
+```js
+import "core-js/stable";
+import "regenerator-runtime/runtime";
+```
+![yarn build output](/posts/img/Snipaste_2021-12-22_11-42-23.png)
+
+`@babel/plugin-transform-runtime` 这个插件用来替换 `@babel/polyfill` 以避免污染全局环境。
+
+
+
+## 其他有用的东西
+
+1. babel 可以[打印出对某个文件生效的配置](https://babeljs.io/docs/en/configuration#print-effective-configs)，也来调试比较方便
+![yarn build output](/posts/img/Snipaste_2021-12-22_12-11-42.png)
