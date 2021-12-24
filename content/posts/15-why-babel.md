@@ -66,6 +66,11 @@ import "regenerator-runtime/runtime";
 
 `@babel/plugin-transform-runtime` 这个插件用来替换 `@babel/polyfill` 以避免污染全局环境。
 
+2. 不安装 @polyfill
+
+如果仍然需要 core-js，参考[Helpers + polyfilling from core-js](https://babeljs.io/docs/en/v7-migration#helpers--polyfilling-from-core-js) 同时使用 helper 和 polyfill
+![yarn build output](/posts/img/Snipaste_2021-12-24_12-32-44.png)
+
 
 
 ## 其他有用的东西
